@@ -10,13 +10,7 @@ class MainViewModel
 
 ): ViewModel() {
 
-    init {
-        getUsers()
-    }
+   fun save() {
 
-    private fun getUsers(
-        searchKeyword: String = "woongi"
-    ) {
-
-    }
+   }
 }
