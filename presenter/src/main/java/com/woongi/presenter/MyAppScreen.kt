@@ -39,8 +39,8 @@ fun MyAppScreen(
 
         Note(
             modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Red)
+                .fillMaxSize()
+                .background(Color.White)
         )
     }
 }
