@@ -1,5 +1,6 @@
 package com.woongi.home
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.asComposePath
@@ -8,7 +9,10 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.woongi.domain.point.repository.DrawingRepository
 import com.woongi.domain.point.usecase.SaveUseCase
+import com.woongi.home.model.constants.NavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,6 +24,8 @@ class MainViewModel
 ) : ViewModel() {
 
     private val _lines: MutableList<Path> = mutableListOf()
+    private val _navigate = MutableSharedFlow<NavigationEvent>()
+    val navigate = _navigate.asSharedFlow()
 
     fun record(path: Path) {
         _lines.add(path)
@@ -35,11 +41,17 @@ class MainViewModel
         }
     }
 
-    fun load() {
-        viewModelScope.launch {
-           saveUseCase.getAll().collectLatest { it->
+//    fun load() {
+//        viewModelScope.launch {
+//           saveUseCase.getAll().collectLatest { it->
+//
+//            }
+//        }
+//    }
 
-            }
+    fun navigateDetail(){
+        viewModelScope.launch {
+            _navigate.emit(NavigationEvent.DETAIL)
         }
     }
 }
