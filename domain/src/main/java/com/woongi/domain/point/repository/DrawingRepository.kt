@@ -1,8 +1,8 @@
 package com.woongi.domain.point.repository
 
-import kotlinx.coroutines.flow.Flow
+import com.woongi.domain.point.entity.Canvas
 
 interface DrawingRepository {
-    fun getAll() : Flow<List<String>>
+    suspend fun getAll() : List<Canvas>
     suspend fun save(lines: String)
 }

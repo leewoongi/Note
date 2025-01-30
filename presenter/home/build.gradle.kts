@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.woongi.presenter"
+    namespace = "com.woongi.home"
     compileSdk = 35
 
     defaultConfig {
@@ -51,11 +51,11 @@ kapt {
 dependencies {
     implementation(project(":core"))
     implementation(project(":domain"))
+    implementation(project(":presenter:detail"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(project(":presenter:detail"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

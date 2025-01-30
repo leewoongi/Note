@@ -1,6 +1,6 @@
 package com.woongi.data.module
 
-import com.woongi.data.repository.DrawingRepositoryImpl
+import com.woongi.data.repository.drawing.DrawingRepositoryImpl
 import com.woongi.domain.point.repository.DrawingRepository
 import dagger.Binds
 import dagger.Module
