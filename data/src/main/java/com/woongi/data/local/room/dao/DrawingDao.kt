@@ -9,6 +9,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DrawingDao {
+
+    @Query("SELECT * FROM drawing_table")
+    fun getAll(): Flow<List<Drawing>>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(line: Drawing)
 }

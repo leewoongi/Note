@@ -6,8 +6,10 @@ import androidx.compose.ui.graphics.asComposePath
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
+import com.woongi.domain.point.repository.DrawingRepository
 import com.woongi.domain.point.usecase.SaveUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -34,6 +36,10 @@ class MainViewModel
     }
 
     fun load() {
+        viewModelScope.launch {
+           saveUseCase.getAll().collectLatest { it->
 
+            }
+        }
     }
 }
