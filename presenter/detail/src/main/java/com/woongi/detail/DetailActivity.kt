@@ -1,7 +1,6 @@
 package com.woongi.detail
 
 import android.os.Bundle
-import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -16,7 +15,6 @@ import kotlinx.coroutines.launch
 class DetailActivity : AppCompatActivity() {
     private val viewModel: DetailViewModel by viewModels()
 
-    private lateinit var textView: TextView
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerViewAdapter: DetailRecyclerViewAdapter
 

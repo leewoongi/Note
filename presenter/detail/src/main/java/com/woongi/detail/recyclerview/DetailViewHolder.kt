@@ -4,9 +4,10 @@ import android.graphics.Path
 import android.view.View
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.woongi.core.extension.dpToPx
 import com.woongi.detail.R
 import com.woongi.detail.ui.CanvasView
-import com.woongi.domain.point.entity.Canvas
+import com.woongi.domain.point.entity.constants.PathType
 
 internal class DetailViewHolder(
     private val view: View
@@ -15,20 +16,41 @@ internal class DetailViewHolder(
     private lateinit var textView: TextView
 
     fun bind(
-        canvas: Canvas,
+        path: com.woongi.domain.point.entity.Path,
         onClick: () -> Unit
     ){
         canvasView = view.findViewById(R.id.canvas)
         textView = view.findViewById(R.id.tv_description)
 
-        val path = Path().apply {
-            // canvas로부터 경로 정보 추출해서 설정
-            // 예시로 canvas의 ID를 사용했다고 가정
-            moveTo(0f, 0f) // 시작 점
-            lineTo(100f, 100f) // 끝 점
+        // 전체화면에 그려진 선들을 54dp 사이즈 캔버스에 들어가게 하기위해서 스케일링
+        val minX = path.path.minOf { it.pointX }
+        val maxX = path.path.maxOf { it.pointX }
+        val minY = path.path.minOf { it.pointY }
+        val maxY = path.path.maxOf { it.pointY }
+
+        val targetSize = 54.dpToPx(context = view.context)
+        val scaleX = targetSize / (maxX - minX)
+        val scaleY = targetSize / (maxY - minY)
+
+        val paths = Path()
+        path.path.forEach {
+            when(it.type){
+                PathType.MOVE_TO -> {
+                    paths.moveTo(
+                        (it.pointX - minX) * scaleX,
+                        (it.pointY - minY) * scaleY
+                    )
+                }
+                PathType.LINE_TO -> {
+                    paths.lineTo(
+                        (it.pointX - minX) * scaleX,
+                        (it.pointY - minY) * scaleY
+                    )
+                }
+            }
         }
 
-        canvasView.setPath(path)
+        canvasView.setPath(paths)
         textView.text = "TEST TEST TEST"
         view.rootView.setOnClickListener {
             onClick()
