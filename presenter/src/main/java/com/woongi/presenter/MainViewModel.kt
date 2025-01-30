@@ -1,26 +1,39 @@
 package com.woongi.presenter
 
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.asComposePath
 import androidx.lifecycle.ViewModel
-import com.woongi.domain.point.entity.Point
+import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
 import com.woongi.domain.point.usecase.SaveUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class MainViewModel
 @Inject constructor(
-   private val saveUseCase: SaveUseCase
-): ViewModel() {
+    private val saveUseCase: SaveUseCase
+) : ViewModel() {
 
-   private val _lines: MutableList<Point> = mutableListOf()
+    private val _lines: MutableList<Path> = mutableListOf()
 
-   fun recordPath(path: Path) {
+    fun record(path: Path) {
+        _lines.add(path)
+    }
 
-   }
+    fun save() {
+        val gson = Gson()
+        val map = mapOf("lines" to _lines)
 
+        val jsonLine = gson.toJson(map)
+        viewModelScope.launch {
+            saveUseCase.save(jsonLine)
+        }
+    }
 
-   fun save() {
+    fun load() {
 
-   }
+    }
 }

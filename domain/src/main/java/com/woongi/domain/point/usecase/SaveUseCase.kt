@@ -7,7 +7,7 @@ class SaveUseCase
 @Inject constructor(
     private val saveRepository: SaveRepository
 ){
-    fun save() {
-        saveRepository.save()
+    suspend fun save(lines: String) {
+        saveRepository.save(lines)
     }
 }

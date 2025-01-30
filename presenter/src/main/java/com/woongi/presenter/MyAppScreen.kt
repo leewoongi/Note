@@ -30,7 +30,8 @@ fun MyAppScreen(
                 .fillMaxWidth()
                 .background(Color.White)
                 .height(56.dp),
-            onClickDownload = { viewModel.save() }
+            onClickDownload = { viewModel.save() },
+            onClickLoad = { viewModel.load() }
         )
 
         Note(
