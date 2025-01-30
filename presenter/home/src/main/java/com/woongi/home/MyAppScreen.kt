@@ -1,4 +1,4 @@
-package com.woongi.presenter
+package com.woongi.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -11,8 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.woongi.presenter.ui.Note
-import com.woongi.presenter.ui.Toolbar
+import com.woongi.home.ui.Note
+import com.woongi.home.ui.Toolbar
 
 @Composable
 fun MyAppScreen(

@@ -1,4 +1,4 @@
-package com.woongi.presenter
+package com.woongi.home
 
 import android.os.Bundle
 import androidx.activity.compose.setContent

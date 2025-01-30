@@ -1,4 +1,4 @@
-package com.woongi.presenter
+package com.woongi.home
 
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.asAndroidPath

@@ -1,4 +1,4 @@
-package com.woongi.presenter.ui
+package com.woongi.home.ui
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement

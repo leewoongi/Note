@@ -47,7 +47,7 @@ android {
 }
 
 dependencies {
-    implementation(project(":presenter"))
+    implementation(project(":presenter:home"))
     implementation(project(":domain"))
     implementation(project(":data"))
 

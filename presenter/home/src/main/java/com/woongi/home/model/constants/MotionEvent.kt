@@ -1,4 +1,4 @@
-package com.woongi.presenter.model.constants
+package com.woongi.home.model.constants
 
 enum class MotionEvent {
     IDLE,
