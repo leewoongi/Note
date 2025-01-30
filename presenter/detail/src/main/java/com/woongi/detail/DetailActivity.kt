@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.snackbar.Snackbar
 import com.woongi.detail.recyclerview.DetailRecyclerViewAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -29,6 +30,12 @@ class DetailActivity : AppCompatActivity() {
         lifecycleScope.launch {
             viewModel.lines.collectLatest {
                 recyclerViewAdapter.set(it)
+            }
+        }
+
+        lifecycleScope.launch {
+            viewModel.snackBar.collectLatest { message ->
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show()
             }
         }
     }
