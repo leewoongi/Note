@@ -3,6 +3,7 @@ plugins {
     id ("androidx.room")
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.hilt.android)
 }
 
 
@@ -64,8 +65,9 @@ dependencies {
 
     /** room */
     implementation(libs.androidx.room.runtime)
-    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.room.ktx)
     testImplementation(libs.androidx.room.testing)
     implementation(libs.androidx.room.paging)
+    kapt(libs.androidx.room.compiler)
+
 }
