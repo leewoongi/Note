@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 interface DrawingDao {
 
     @Query("SELECT * FROM drawing_table")
-    fun getAll(): Flow<List<Drawing>>
+    suspend fun getAll(): List<Drawing>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(line: Drawing)
