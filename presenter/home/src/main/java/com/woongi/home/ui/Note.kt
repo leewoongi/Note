@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.home.MainViewModel
 
 
@@ -33,16 +34,24 @@ fun Note(
                             addPath(path)
                             moveTo(dragAmount.x, dragAmount.y)
                         }
+                        viewModel.record(
+                            type = PathType.MOVE_TO,
+                            currentX = dragAmount.x,
+                            currentY = dragAmount.y
+                        )
                     },
-                    onDragEnd = {
-                       viewModel.record(path)
-                    },
+                    onDragEnd = {},
                     onDragCancel = {  },
                     onDrag = { change: PointerInputChange, dragAmount: Offset ->
                         path = Path().apply {
                             addPath(path)
                             lineTo(change.position.x, change.position.y)
                         }
+                        viewModel.record(
+                            type = PathType.LINE_TO,
+                            currentX = change.position.x,
+                            currentY = change.position.y
+                        )
                         change.consume()
                     }
                 )

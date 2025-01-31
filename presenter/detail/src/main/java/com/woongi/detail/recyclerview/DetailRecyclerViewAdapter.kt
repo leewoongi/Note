@@ -6,10 +6,11 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.woongi.detail.R
 import com.woongi.domain.point.entity.Canvas
+import com.woongi.domain.point.entity.Path
 
 class DetailRecyclerViewAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>()  {
-    private val items = mutableListOf<Canvas>()
+    private val items = mutableListOf<Path>()
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -30,13 +31,13 @@ class DetailRecyclerViewAdapter(
     ) {
         if(holder is DetailViewHolder){
             holder.bind(
-                canvas = items[position],
+                path = items[position],
                 onClick = { }
             )
         }
     }
 
-    fun set(newItems: List<Canvas>) {
+    fun set(newItems: List<Path>) {
         val diffCallback = DetailDiffUtil(items, newItems)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
 

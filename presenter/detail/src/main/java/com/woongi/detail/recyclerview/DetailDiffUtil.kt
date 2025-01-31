@@ -1,11 +1,11 @@
 package com.woongi.detail.recyclerview
 
 import androidx.recyclerview.widget.DiffUtil
-import com.woongi.domain.point.entity.Canvas
+import com.woongi.domain.point.entity.Path
 
 class DetailDiffUtil(
-    private val oldList: List<Canvas>,
-    private val newList: List<Canvas>
+    private val oldList: List<Path>,
+    private val newList: List<Path>
 ): DiffUtil.Callback() {
     override fun getOldListSize(): Int = oldList.size
 
@@ -15,7 +15,7 @@ class DetailDiffUtil(
         oldItemPosition: Int,
         newItemPosition: Int
     ): Boolean {
-        return oldList[oldItemPosition].id == newList[newItemPosition].id
+        return oldList[oldItemPosition].path == newList[newItemPosition].path
     }
 
     override fun areContentsTheSame(

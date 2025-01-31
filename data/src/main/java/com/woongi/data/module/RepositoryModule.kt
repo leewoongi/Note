@@ -1,7 +1,7 @@
 package com.woongi.data.module
 
-import com.woongi.data.repository.drawing.DrawingRepositoryImpl
-import com.woongi.domain.point.repository.DrawingRepository
+import com.woongi.data.repository.drawing.PathRepositoryImpl
+import com.woongi.domain.point.repository.PathRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -13,6 +13,6 @@ abstract class RepositoryModule {
 
     @Binds
     abstract fun bindSaveRepository(
-        drawingRepositoryImpl: DrawingRepositoryImpl
-    ): DrawingRepository
+        drawingRepositoryImpl: PathRepositoryImpl
+    ): PathRepository
 }

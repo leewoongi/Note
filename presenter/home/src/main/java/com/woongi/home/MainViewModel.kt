@@ -1,9 +1,10 @@
 package com.woongi.home
 
-import androidx.compose.ui.graphics.Path
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
+import com.woongi.domain.point.entity.Path
+import com.woongi.domain.point.entity.Point
+import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.NavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,25 +19,48 @@ class MainViewModel
     private val saveUseCase: SaveUseCase
 ) : ViewModel() {
 
-    private val _lines: MutableList<Path> = mutableListOf()
+    private val _lines: MutableList<Point> = mutableListOf()
     private val _navigate = MutableSharedFlow<NavigationEvent>()
     val navigate = _navigate.asSharedFlow()
 
-    fun record(path: Path) {
-        _lines.add(path)
+    private val _snackBar = MutableSharedFlow<String>(replay = 1)
+    val snackBar = _snackBar.asSharedFlow()
+
+    fun record(
+        type: PathType,
+        currentX: Float,
+        currentY: Float
+    ) {
+        _lines.add(
+            Point(
+                type = type,
+                pointX = currentX,
+                pointY = currentY
+            )
+        )
     }
 
     fun save() {
-        val gson = Gson()
-        val map = mapOf("lines" to _lines)
-
-        val jsonLine = gson.toJson(map)
         viewModelScope.launch {
-            saveUseCase.save(jsonLine)
+            if(_lines.isEmpty()) {
+                _snackBar.emit("저장할 데이터가 없습니다.")
+                return@launch
+            }
+
+            try{
+                saveUseCase.save(
+                    Path(
+                        path = _lines
+                    )
+                )
+                _snackBar.emit("저장에 성공 했습니다.")
+            } catch (e: Exception) {
+                _snackBar.emit("저장에 실패 했습니다.")
+            }
         }
     }
 
-    fun navigateDetail(){
+    fun navigateDetail() {
         viewModelScope.launch {
             _navigate.emit(NavigationEvent.DETAIL)
         }

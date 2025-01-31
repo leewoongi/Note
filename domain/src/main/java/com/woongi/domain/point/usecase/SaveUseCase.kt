@@ -1,14 +1,14 @@
 package com.woongi.domain.point.usecase
 
-import com.woongi.domain.point.repository.DrawingRepository
-import kotlinx.coroutines.flow.Flow
+import com.woongi.domain.point.entity.Path
+import com.woongi.domain.point.repository.PathRepository
 import javax.inject.Inject
 
 class SaveUseCase
 @Inject constructor(
-    private val drawingRepository: DrawingRepository
+    private val pathRepository: PathRepository
 ){
-    suspend fun save(lines: String) {
-        drawingRepository.save(lines)
+    suspend fun save(lines: Path) {
+        pathRepository.save(lines)
     }
 }
