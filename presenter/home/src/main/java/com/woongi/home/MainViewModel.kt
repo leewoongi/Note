@@ -23,6 +23,9 @@ class MainViewModel
     private val _navigate = MutableSharedFlow<NavigationEvent>()
     val navigate = _navigate.asSharedFlow()
 
+    private val _snackBar = MutableSharedFlow<String>(replay = 1)
+    val snackBar = _snackBar.asSharedFlow()
+
     fun record(
         type: PathType,
         currentX: Float,
@@ -39,11 +42,21 @@ class MainViewModel
 
     fun save() {
         viewModelScope.launch {
-            saveUseCase.save(
-                Path(
-                    path = _lines
+            if(_lines.isEmpty()) {
+                _snackBar.emit("저장할 데이터가 없습니다.")
+                return@launch
+            }
+
+            try{
+                saveUseCase.save(
+                    Path(
+                        path = _lines
+                    )
                 )
-            )
+                _snackBar.emit("저장에 성공 했습니다.")
+            } catch (e: Exception) {
+                _snackBar.emit("저장에 실패 했습니다.")
+            }
         }
     }
 
