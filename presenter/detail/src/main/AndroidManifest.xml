@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+    <application>
+        <activity
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            android:name="com.woongi.detail.DetailActivity"
+            android:exported="true"
+            tools:ignore="WrongManifestParent">
+        </activity>
+    </application>
+</manifest>
