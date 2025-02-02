@@ -5,7 +5,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.woongi.detail.R
-import com.woongi.domain.point.entity.Canvas
 import com.woongi.domain.point.entity.Path
 
 class DetailRecyclerViewAdapter(

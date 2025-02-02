@@ -6,5 +6,7 @@ import com.woongi.domain.point.entity.constants.PathType
 data class Point(
     val type: PathType,
     val pointX: Float,
-    val pointY: Float
+    val pointY: Float,
+    val thickness: Float,
+    val opacity: Float
 )

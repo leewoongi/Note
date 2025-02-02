@@ -9,7 +9,9 @@ import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.NavigationEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,16 +28,26 @@ class MainViewModel
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
 
+    private val _thickness: MutableStateFlow<Float> = MutableStateFlow(0f)
+    val thickness = _thickness.asStateFlow()
+
+    private val _opacity: MutableStateFlow<Float> = MutableStateFlow(0f)
+    val opacity = _opacity.asStateFlow()
+
     fun record(
         type: PathType,
         currentX: Float,
-        currentY: Float
+        currentY: Float,
+        thickness: Float,
+        opacity: Float
     ) {
         _lines.add(
             Point(
                 type = type,
                 pointX = currentX,
-                pointY = currentY
+                pointY = currentY,
+                thickness = thickness,
+                opacity = opacity
             )
         )
     }
@@ -58,6 +70,14 @@ class MainViewModel
                 _snackBar.emit("저장에 실패 했습니다.")
             }
         }
+    }
+
+    fun updateThickness(thickness: Float) {
+        _thickness.value = thickness
+    }
+
+    fun updateOpacity(opacity: Float) {
+        _opacity.value = opacity
     }
 
     fun navigateDetail() {
