@@ -27,7 +27,6 @@ fun Note(
     viewModel: MainViewModel
 ){
     var currentPath by remember { mutableStateOf(AndroidPath()) }
-    val thickness by viewModel.thickness.collectAsState()
 
     Canvas(
         modifier = modifier
@@ -47,7 +46,7 @@ fun Note(
                         )
                     },
                     onDragEnd = {
-                        viewModel.addPath(currentPath, thickness)
+                        viewModel.addPath(currentPath, viewModel.thickness.value)
                         viewModel.recordLine()
                         currentPath = AndroidPath()
                     },
@@ -81,7 +80,7 @@ fun Note(
         drawPath(
             path = currentPath,
             color = Color.Blue,
-            style = Stroke(width = thickness) // 선 두께 설정
+            style = Stroke(width = viewModel.thickness.value) // 선 두께 설정
         )
     }
 }

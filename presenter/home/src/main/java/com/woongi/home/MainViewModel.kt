@@ -1,6 +1,10 @@
 package com.woongi.home
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.AndroidPath
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -35,11 +39,11 @@ class MainViewModel
     private val _lines: MutableList<Line> = mutableListOf()
 
 
-    private val _thickness: MutableStateFlow<Float> = MutableStateFlow(0f)
-    val thickness = _thickness.asStateFlow()
+    private val _thickness = mutableFloatStateOf(1f)
+    val thickness: State<Float> get() = _thickness
 
-    private val _opacity: MutableStateFlow<Float> = MutableStateFlow(0f)
-    val opacity = _opacity.asStateFlow()
+    private val _opacity = mutableFloatStateOf(1f)
+    val opacity: State<Float> get() = _opacity
 
     private val _navigate = MutableSharedFlow<NavigationEvent>()
     val navigate = _navigate.asSharedFlow()
@@ -48,11 +52,11 @@ class MainViewModel
     val snackBar = _snackBar.asSharedFlow()
 
     fun updateThickness(thickness: Float) {
-        _thickness.value = thickness
+        _thickness.floatValue = thickness
     }
 
     fun updateOpacity(opacity: Float) {
-        _opacity.value = opacity
+        _opacity.floatValue = opacity
     }
 
     // 캔버스에 그리는 용도

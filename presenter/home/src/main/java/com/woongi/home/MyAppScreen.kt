@@ -15,6 +15,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -111,6 +112,8 @@ fun MyAppScreen(
                         isPopupVisible = false
                     },
                     icon = Icons.Default.Close,
+                    thickness = viewModel.thickness.value,
+                    opacity = viewModel.opacity.value
                 )
             }
         }

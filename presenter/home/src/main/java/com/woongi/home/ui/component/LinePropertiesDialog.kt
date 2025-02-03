@@ -26,9 +26,11 @@ fun LinePropertiesDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: (Float, Float) -> Unit,
     icon: ImageVector,
+    thickness: Float = 1f,
+    opacity: Float = 1f
 ) {
-    var lineThickness by remember { mutableFloatStateOf(2f) }
-    var lineOpacity by remember { mutableFloatStateOf(1f) }
+    var lineThickness by remember { mutableFloatStateOf(thickness) }
+    var lineOpacity by remember { mutableFloatStateOf(opacity) }
 
     AlertDialog(
         title = {
