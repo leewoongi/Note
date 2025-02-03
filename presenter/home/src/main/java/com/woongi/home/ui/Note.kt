@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.AndroidPath
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -25,52 +26,62 @@ fun Note(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel
 ){
-    var path by remember { mutableStateOf(Path()) }
+    var currentPath by remember { mutableStateOf(AndroidPath()) }
     val thickness by viewModel.thickness.collectAsState()
-    val opacity by viewModel.opacity.collectAsState()
 
     Canvas(
         modifier = modifier
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { dragAmount: Offset ->
-                        path = Path().apply {
-                            addPath(path)
+                        currentPath = AndroidPath().apply {
+                            addPath(currentPath)
                             moveTo(dragAmount.x, dragAmount.y)
                         }
-                        viewModel.record(
+
+                        // room에 저장할 데이터
+                        viewModel.recordPoint(
                             type = PathType.MOVE_TO,
                             currentX = dragAmount.x,
-                            currentY = dragAmount.y,
-                            thickness = thickness,
-                            opacity = opacity
+                            currentY = dragAmount.y
                         )
                     },
-                    onDragEnd = {},
+                    onDragEnd = {
+                        viewModel.addPath(currentPath, thickness)
+                        viewModel.recordLine()
+                        currentPath = AndroidPath()
+                    },
+
                     onDragCancel = {  },
                     onDrag = { change: PointerInputChange, dragAmount: Offset ->
-                        path = Path().apply {
-                            addPath(path)
+                        currentPath = AndroidPath().apply {
+                            addPath(currentPath)
                             lineTo(change.position.x, change.position.y)
                         }
-                        viewModel.record(
+                        viewModel.recordPoint(
                             type = PathType.LINE_TO,
                             currentX = change.position.x,
-                            currentY = change.position.y,
-                            thickness = thickness,
-                            opacity = opacity
+                            currentY = change.position.y
                         )
                         change.consume()
                     }
                 )
             }
     ){
-        drawPath(
-            path = path,
-            color = Color.Blue,
-            style = Stroke(
-                width = thickness
+        // 기존에 그린 선
+        viewModel.paths.forEach {
+            drawPath(
+                path = it.path,
+                color = it.color,
+                style = Stroke(it.thickness)
             )
+        }
+
+        // 현재 그려지고 있는 선
+        drawPath(
+            path = currentPath,
+            color = Color.Blue,
+            style = Stroke(width = thickness) // 선 두께 설정
         )
     }
 }
