@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Path
 import android.util.AttributeSet
-import android.util.Log
 import android.view.View
 
 class CanvasView
@@ -15,15 +14,16 @@ class CanvasView
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    private val path = Path()
+    // path와 현재는 thickness 정보만 가지고 있음
+    private val paths = mutableListOf<Pair<Path, Float>>()
     private val paint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
-        strokeWidth = 5f
     }
 
-    fun setPath(newPath: Path) {
-        path.set(newPath)
+    fun setPath(newPaths: MutableList<Pair<Path, Float>>) {
+        paths.clear()
+        paths.addAll(newPaths)
         invalidate()
     }
 
@@ -34,6 +34,9 @@ class CanvasView
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        canvas.drawPath(path, paint)
+        for ((path, thickness) in paths) {
+            paint.strokeWidth = thickness
+            canvas.drawPath(path, paint)
+        }
     }
 }

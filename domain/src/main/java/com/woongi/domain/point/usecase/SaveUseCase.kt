@@ -8,7 +8,7 @@ class SaveUseCase
 @Inject constructor(
     private val pathRepository: PathRepository
 ){
-    suspend fun save(lines: Path) {
-        pathRepository.save(lines)
+    suspend fun save(path: Path) {
+        pathRepository.save(path)
     }
 }
