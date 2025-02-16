@@ -4,18 +4,6 @@ plugins {
 
 android {
     namespace = "com.woongi.home"
-    compileSdk = 35
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
-}
-
-kotlin {
-    compilerOptions {
-        JavaVersion.VERSION_17.toString()
-    }
 }
 
 //plugins {

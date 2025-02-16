@@ -1,6 +1,9 @@
 package com.woongi.convention.module
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.gradle.LibraryExtension
+import com.woongi.convention.base.configureApplicationProject
+import com.woongi.convention.base.configureKotlinProject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -23,31 +26,31 @@ class ApplicationConventionPlugin : Plugin<Project> {
             properties.load(project.rootProject.file("local.properties").inputStream())
 
             extensions.configure<ApplicationExtension> {
+                configureApplicationProject(this)
+                configureKotlinProject(this)
+
                 defaultConfig {
-                    compileSdk = 35
                     namespace = "com.woongi.note"
                     applicationId = "com.woongi.note"
                     versionCode = 20250215
                     versionName = "1.0.0"
-
-                    testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-                    targetSdk = 35
-                    minSdk = 24
-
-                    buildFeatures {
-                        // gradle 8.0부터 buildConfig를 사용하기 위함
-                        buildConfig = true
-                    }
-
-                    buildTypes {
-                        release {
-                            isMinifyEnabled = false
-                            proguardFiles(
-                                getDefaultProguardFile("proguard-android-optimize.txt"),
-                                "proguard-rules.pro"
-                            )
-                        }
-                    }
+//
+//                    targetSdk = 35
+//
+//                    buildFeatures {
+//                        // gradle 8.0부터 buildConfig를 사용하기 위함
+//                        buildConfig = true
+//                    }
+//
+//                    buildTypes {
+//                        release {
+//                            isMinifyEnabled = false
+//                            proguardFiles(
+//                                getDefaultProguardFile("proguard-android-optimize.txt"),
+//                                "proguard-rules.pro"
+//                            )
+//                        }
+//                    }
                 }
             }
 
