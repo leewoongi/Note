@@ -16,7 +16,6 @@ class ApplicationConventionPlugin : Plugin<Project> {
             pluginManager.apply {
                 apply("com.android.application")
                 apply("org.jetbrains.kotlin.android")
-                apply("org.jetbrains.kotlin.plugin.compose")
             }
 
             val properties = Properties()
@@ -25,8 +24,8 @@ class ApplicationConventionPlugin : Plugin<Project> {
             extensions.configure<ApplicationExtension> {
                 compileSdk = 35
                 defaultConfig {
-                    applicationId = "com.woongi.templete"
-                    namespace = "com.woongi.templete"
+                    applicationId = "com.woongi.note"
+                    namespace = "com.woongi.note"
                     versionCode = 20250215
                     versionName = "1.0.0"
 
@@ -37,11 +36,6 @@ class ApplicationConventionPlugin : Plugin<Project> {
                     buildFeatures {
                         // gradle 8.0부터 buildConfig를 사용하기 위함
                         buildConfig = true
-                        compose = true
-                    }
-
-                    dataBinding {
-                        enable = true
                     }
                 }
             }
@@ -51,7 +45,8 @@ class ApplicationConventionPlugin : Plugin<Project> {
                 add("implementation", project(":domain"))
                 add("implementation", project(":data"))
                 add("implementation", project(":presenter"))
-                
+                add("implementation", project(":core"))
+
                 add("implementation", libs.findLibrary("junit").get())
                 add("implementation", libs.findLibrary("androidx-junit").get())
                 add("implementation", libs.findLibrary("androidx-espresso-core").get())
