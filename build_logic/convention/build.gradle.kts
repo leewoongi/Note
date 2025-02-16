@@ -36,6 +36,11 @@ gradlePlugin {
             implementationClass = "com.woongi.convention.module.DomainConventionPlugin"
         }
 
+        register("AndroidData") {
+            id = "note.data"
+            implementationClass = "com.woongi.convention.module.DataConventionPlugin"
+        }
+
         register("AndroidHilt") {
             id = "note.hilt"
             implementationClass = "com.woongi.convention.HiltConventionPlugin"

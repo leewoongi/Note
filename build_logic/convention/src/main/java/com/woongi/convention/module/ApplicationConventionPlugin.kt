@@ -2,6 +2,7 @@ package com.woongi.convention.module
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.LibraryExtension
+import com.woongi.convention.base.configureAndroidProject
 import com.woongi.convention.base.configureApplicationProject
 import com.woongi.convention.base.configureJunitProject
 import com.woongi.convention.base.configureKotlinProject
