@@ -3,6 +3,7 @@ package com.woongi.convention.module
 import com.android.build.api.dsl.ApplicationExtension
 import com.android.build.gradle.LibraryExtension
 import com.woongi.convention.base.configureApplicationProject
+import com.woongi.convention.base.configureJunitProject
 import com.woongi.convention.base.configureKotlinProject
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -28,30 +29,7 @@ class ApplicationConventionPlugin : Plugin<Project> {
             extensions.configure<ApplicationExtension> {
                 configureApplicationProject(this)
                 configureKotlinProject(this)
-
-                defaultConfig {
-                    namespace = "com.woongi.note"
-                    applicationId = "com.woongi.note"
-                    versionCode = 20250215
-                    versionName = "1.0.0"
-//
-//                    targetSdk = 35
-//
-//                    buildFeatures {
-//                        // gradle 8.0부터 buildConfig를 사용하기 위함
-//                        buildConfig = true
-//                    }
-//
-//                    buildTypes {
-//                        release {
-//                            isMinifyEnabled = false
-//                            proguardFiles(
-//                                getDefaultProguardFile("proguard-android-optimize.txt"),
-//                                "proguard-rules.pro"
-//                            )
-//                        }
-//                    }
-                }
+                configureJunitProject(this)
             }
 
             val libs = extensions.getByType<VersionCatalogsExtension>().named("libs")
@@ -59,12 +37,8 @@ class ApplicationConventionPlugin : Plugin<Project> {
                 add("implementation", project(":domain"))
                 add("implementation", project(":data"))
                 add("implementation", project(":presenter:home"))
+                add("implementation", project(":presenter:detail"))
                 add("implementation", project(":core"))
-
-                add("implementation", libs.findLibrary("junit").get())
-                add("implementation", libs.findLibrary("androidx-junit").get())
-                add("implementation", libs.findLibrary("androidx-espresso-core").get())
-
             }
         }
     }

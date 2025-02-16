@@ -1,22 +1,22 @@
 package com.woongi.convention.base
 
-import com.android.build.api.dsl.ApplicationExtension
+import com.android.build.api.dsl.LibraryExtension
 import org.gradle.api.Project
 
-internal fun Project.configureApplicationProject(
-    applicationExtension: ApplicationExtension
+internal fun Project.configureFeatureProject(
+    libraryExtension: LibraryExtension
 ){
-    applicationExtension.apply {
+    libraryExtension.apply {
         defaultConfig {
-            targetSdk = 35
-            namespace = "com.woongi.note"
-            applicationId = "com.woongi.note"
-            versionCode = 20250215
-            versionName = "1.0.0"
+            lint.targetSdk = 35
 
             buildFeatures {
                 // gradle 8.0부터 buildConfig를 사용하기 위함
                 buildConfig = true
+            }
+
+            composeOptions {
+                kotlinCompilerExtensionVersion = "1.5.15"
             }
 
             buildTypes {
