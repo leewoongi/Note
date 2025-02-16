@@ -31,6 +31,11 @@ gradlePlugin {
             implementationClass = "com.woongi.convention.module.FeatureConventionPlugin"
         }
 
+        register("AndroidDomain") {
+            id = "note.domain"
+            implementationClass = "com.woongi.convention.module.DomainConventionPlugin"
+        }
+
         register("AndroidHilt") {
             id = "note.hilt"
             implementationClass = "com.woongi.convention.HiltConventionPlugin"
