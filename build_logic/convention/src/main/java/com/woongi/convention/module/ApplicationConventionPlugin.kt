@@ -1,14 +1,12 @@
 package com.woongi.convention.module
 
 import com.android.build.api.dsl.ApplicationExtension
-import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
-import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import java.util.Properties
 
 class ApplicationConventionPlugin : Plugin<Project> {
@@ -19,17 +17,15 @@ class ApplicationConventionPlugin : Plugin<Project> {
                 apply("org.jetbrains.kotlin.android")
                 apply("kotlin-kapt")
                 apply("note.hilt")
-                // 힐트 추가해야함
             }
 
             val properties = Properties()
             properties.load(project.rootProject.file("local.properties").inputStream())
 
             extensions.configure<ApplicationExtension> {
-                compileSdk = 35
-                namespace = "com.woongi.note"
-
                 defaultConfig {
+                    compileSdk = 35
+                    namespace = "com.woongi.note"
                     applicationId = "com.woongi.note"
                     versionCode = 20250215
                     versionName = "1.0.0"
@@ -59,7 +55,7 @@ class ApplicationConventionPlugin : Plugin<Project> {
             dependencies {
                 add("implementation", project(":domain"))
                 add("implementation", project(":data"))
-                add("implementation", project(":presenter"))
+                add("implementation", project(":presenter:home"))
                 add("implementation", project(":core"))
 
                 add("implementation", libs.findLibrary("junit").get())

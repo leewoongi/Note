@@ -26,6 +26,11 @@ gradlePlugin {
             implementationClass = "com.woongi.convention.module.ApplicationConventionPlugin"
         }
 
+        register("AndroidFeature") {
+            id = "note.feature"
+            implementationClass = "com.woongi.convention.module.FeatureConventionPlugin"
+        }
+
         register("AndroidHilt") {
             id = "note.hilt"
             implementationClass = "com.woongi.convention.HiltConventionPlugin"
