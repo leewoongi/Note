@@ -25,5 +25,10 @@ gradlePlugin {
             id = "note.application"
             implementationClass = "com.woongi.convention.module.ApplicationConventionPlugin"
         }
+
+        register("AndroidHilt") {
+            id = "note.hilt"
+            implementationClass = "com.woongi.convention.HiltConventionPlugin"
+        }
     }
 }

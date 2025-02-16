@@ -18,6 +18,7 @@ class ApplicationConventionPlugin : Plugin<Project> {
                 apply("com.android.application")
                 apply("org.jetbrains.kotlin.android")
                 apply("kotlin-kapt")
+                apply("note.hilt")
                 // 힐트 추가해야함
             }
 
