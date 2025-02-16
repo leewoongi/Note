@@ -1,7 +1,6 @@
 package com.woongi.convention.module
 
 import com.android.build.api.dsl.LibraryExtension
-import com.woongi.convention.base.configureComposeProject
 import com.woongi.convention.base.configureAndroidProject
 import com.woongi.convention.base.configureJunitProject
 import com.woongi.convention.base.configureKotlinProject
