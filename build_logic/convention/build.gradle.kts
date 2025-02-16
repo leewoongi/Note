@@ -45,5 +45,10 @@ gradlePlugin {
             id = "note.hilt"
             implementationClass = "com.woongi.convention.HiltConventionPlugin"
         }
+
+        register("AndroidRoom") {
+            id = "note.room"
+            implementationClass = "com.woongi.convention.RoomConventionPlugin"
+        }
     }
 }
