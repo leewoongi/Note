@@ -7,6 +7,12 @@ java {
     targetCompatibility = JavaVersion.VERSION_17
 }
 
+kotlin {
+    compilerOptions {
+        JavaVersion.VERSION_17.toString()
+    }
+}
+
 dependencies {
     compileOnly(libs.androidx.room.gradle.plugin)
     compileOnly(libs.android.pluginGradle)
@@ -17,7 +23,7 @@ gradlePlugin {
     plugins {
         register("AndroidApplication") {
             id = "note.application"
-            implementationClass = "com.note.convention.ApplicationConventionPlugin"
+            implementationClass = "com.woongi.convention.module.ApplicationConventionPlugin"
         }
     }
 }

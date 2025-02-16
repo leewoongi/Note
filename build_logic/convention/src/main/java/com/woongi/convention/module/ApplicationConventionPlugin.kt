@@ -1,7 +1,6 @@
 package com.woongi.convention.module
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.android.build.api.dsl.ComposeOptions
 import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -9,9 +8,7 @@ import org.gradle.api.artifacts.VersionCatalogsExtension
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.getByType
-import org.gradle.kotlin.dsl.support.kotlinCompilerOptions
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompilerOptions
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
+import org.jetbrains.kotlin.gradle.tasks.KotlinJvmCompile
 import java.util.Properties
 
 class ApplicationConventionPlugin : Plugin<Project> {
@@ -53,15 +50,6 @@ class ApplicationConventionPlugin : Plugin<Project> {
                                 "proguard-rules.pro"
                             )
                         }
-                    }
-
-                    compileOptions {
-                        sourceCompatibility = JavaVersion.VERSION_17
-                        targetCompatibility = JavaVersion.VERSION_17
-                    }
-
-                    extensions.configure<KotlinJvmCompilerOptions> {
-                        JavaVersion.VERSION_17.toString()
                     }
                 }
             }
