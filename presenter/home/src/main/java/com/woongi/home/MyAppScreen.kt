@@ -31,6 +31,7 @@ import com.woongi.home.model.constants.NavigationEvent
 import com.woongi.home.ui.Note
 import com.woongi.home.ui.Toolbar
 import com.woongi.home.ui.component.LinePropertiesDialog
+import com.woongi.home.ui.component.PlatteDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
@@ -43,7 +44,8 @@ fun MyAppScreen(
 
     val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-    var isPopupVisible by remember { mutableStateOf(false) }
+    var isPropertyPopupVisible by remember { mutableStateOf(false) }
+    var isColorPopupVisible by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.navigate.collect { event ->
@@ -84,9 +86,10 @@ fun MyAppScreen(
                         .fillMaxWidth()
                         .background(Color.White)
                         .height(56.dp),
+                    onClickPlatte = { isColorPopupVisible = true },
                     onClickDownload = { viewModel.save() },
                     onClickLoad = { viewModel.navigateDetail() },
-                    onClickDrawing = { isPopupVisible = true }
+                    onClickDrawing = { isPropertyPopupVisible = true }
                 )
 
                 Note(
@@ -103,17 +106,28 @@ fun MyAppScreen(
                     .fillMaxSize(),
             )
 
-            if (isPopupVisible) {
+            if (isPropertyPopupVisible) {
                 LinePropertiesDialog(
                     modifier = Modifier.fillMaxWidth(),
                     onDismissRequest = { thickness, opacity ->
                         viewModel.updateThickness(thickness)
                         viewModel.updateOpacity(opacity)
-                        isPopupVisible = false
+                        isPropertyPopupVisible = false
                     },
                     icon = Icons.Default.Close,
                     thickness = viewModel.thickness.value,
                     opacity = viewModel.opacity.value
+                )
+            }
+
+            if(isColorPopupVisible) {
+                PlatteDialog(
+                    modifier = Modifier.fillMaxWidth(),
+                    icon = Icons.Default.Close,
+                    selectColorProperty = { color, brightness, opacity ->
+
+                    },
+                    onDismissRequest = { isColorPopupVisible = false }
                 )
             }
         }
