@@ -15,13 +15,13 @@ class CanvasView
 ) : View(context, attrs) {
 
     // path와 현재는 thickness 정보만 가지고 있음
-    private val paths = mutableListOf<Pair<Path, Float>>()
+    private val paths = mutableListOf<Triple<Path, Float, Int>>()
     private val paint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
     }
 
-    fun setPath(newPaths: MutableList<Pair<Path, Float>>) {
+    fun setPath(newPaths: MutableList<Triple<Path, Float, Int>>) {
         paths.clear()
         paths.addAll(newPaths)
         invalidate()
@@ -34,8 +34,9 @@ class CanvasView
 
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        for ((path, thickness) in paths) {
+        for ((path, thickness, color) in paths) {
             paint.strokeWidth = thickness
+            paint.color = color
             canvas.drawPath(path, paint)
         }
     }
