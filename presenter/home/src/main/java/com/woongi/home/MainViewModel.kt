@@ -132,11 +132,13 @@ class MainViewModel
             try{
                 saveUseCase.save(
                     com.woongi.domain.point.entity.Path(
+                        title = "TEST TEST TEST",
                         path = _lines
                     )
                 )
                 _snackBar.emit("저장에 성공 했습니다.")
             } catch (e: Exception) {
+                println("TEST TEST TEST e: $e")
                 _snackBar.emit("저장에 실패 했습니다.")
             }
         }
