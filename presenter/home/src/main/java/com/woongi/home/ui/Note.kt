@@ -79,7 +79,7 @@ fun Note(
         // 현재 그려지고 있는 선
         drawPath(
             path = currentPath,
-            color = Color.Blue,
+            color = Color(viewModel.color.value),
             style = Stroke(width = viewModel.thickness.value) // 선 두께 설정
         )
     }

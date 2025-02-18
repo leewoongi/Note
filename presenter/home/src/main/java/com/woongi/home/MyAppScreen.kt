@@ -125,7 +125,8 @@ fun MyAppScreen(
                     modifier = Modifier.fillMaxWidth(),
                     icon = Icons.Default.Close,
                     selectColorProperty = { color, brightness, opacity ->
-
+                        isColorPopupVisible = false
+                        viewModel.updateColor(color, brightness, opacity)
                     },
                     onDismissRequest = { isColorPopupVisible = false }
                 )

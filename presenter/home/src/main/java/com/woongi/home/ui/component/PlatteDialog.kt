@@ -42,7 +42,7 @@ fun PlatteDialog(
     val colors = List(20) { Color(Random.nextFloat(), Random.nextFloat(), Random.nextFloat(), 1f) }
 
     var selectedColor by remember { mutableStateOf(Color.Black) }
-    var brightness by remember { mutableFloatStateOf(0.5f) }
+    var brightness by remember { mutableFloatStateOf(1f) }
     var opacity by remember { mutableFloatStateOf(1f) }
 
 
@@ -101,7 +101,7 @@ fun PlatteDialog(
                 Slider(
                     value = brightness,
                     onValueChange = { brightness = it },
-                    valueRange = 0f..100f
+                    valueRange = 0f..1f
                 )
 
                 Text(text = "Opacity: ${(opacity * 100).toInt()}%")

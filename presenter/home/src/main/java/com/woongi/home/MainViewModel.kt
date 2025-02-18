@@ -3,11 +3,13 @@ package com.woongi.home
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.AndroidPath
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -45,6 +47,9 @@ class MainViewModel
     private val _opacity = mutableFloatStateOf(1f)
     val opacity: State<Float> get() = _opacity
 
+    private val _color = mutableIntStateOf(Color.Black.toArgb())
+    val color: State<Int> get() = _color
+
     private val _navigate = MutableSharedFlow<NavigationEvent>()
     val navigate = _navigate.asSharedFlow()
 
@@ -67,7 +72,7 @@ class MainViewModel
         _paths.add(
             PathUiModel(
                 path = path,
-                color = Color.Red, // 임시 색상
+                color = Color(color.value), // 임시 색상
                 thickness = thickness,
                 opacity = 1f
             )
@@ -95,10 +100,26 @@ class MainViewModel
             Line(
                 thickness = thickness.value,
                 opacity = opacity.value,
-                points = _points.map { it.copy() }
+                points = _points.map { it.copy() },
+                color = color.value
             )
         )
         _points.clear()
+    }
+
+
+    fun updateColor(
+        color: Color,
+        brightness: Float,
+        opacity: Float
+    ) {
+        val newColor = color.copy(
+            red = (color.red * brightness).coerceIn(0f, 1f),
+            green = (color.green  * brightness).coerceIn(0f, 1f),
+            blue  = (color.blue  * brightness).coerceIn(0f, 1f),
+            alpha = opacity
+        )
+        _color.intValue = newColor.toArgb()
     }
 
     fun save() {
