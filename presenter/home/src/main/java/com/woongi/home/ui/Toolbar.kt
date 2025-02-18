@@ -22,6 +22,7 @@ import com.woongi.core.extension.singleClick
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
+    onClickPlatte: () -> Unit = {},
     onClickDownload: () -> Unit = {},
     onClickLoad: () -> Unit = {},
     onClickDrawing: () -> Unit = {}
@@ -37,6 +38,18 @@ fun Toolbar(
                 .align(Alignment.CenterEnd),
             horizontalArrangement = Arrangement.End
         ) {
+
+            Icon(
+                modifier = Modifier
+                    .singleClick(
+                        onSingleClick = { onClickPlatte() }
+                    ),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_platte),
+                contentDescription = "download",
+                tint = Color.Black,
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
                 modifier = Modifier

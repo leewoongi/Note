@@ -35,7 +35,7 @@ internal class DetailViewHolder(
         val scaleY = targetSize / (maxY - minY)
 
 
-        val pair: MutableList<Pair<Path, Float>> = mutableListOf()
+        val pair: MutableList<Triple<Path, Float, Int>> = mutableListOf()
         path.path.forEach { line ->
             val paths = Path()
             line.points.forEach { point: Point ->
@@ -55,7 +55,7 @@ internal class DetailViewHolder(
                     }
                 }
             }
-            pair.add(Pair(paths, line.thickness))
+            pair.add(Triple(paths, line.thickness, line.color))
         }
 
         canvasView.setPath(pair)
