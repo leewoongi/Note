@@ -15,7 +15,7 @@ class DetailDiffUtil(
         oldItemPosition: Int,
         newItemPosition: Int
     ): Boolean {
-        return oldList[oldItemPosition].path == newList[newItemPosition].path
+        return oldList[oldItemPosition].id == newList[newItemPosition].id
     }
 
     override fun areContentsTheSame(

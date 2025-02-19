@@ -1,5 +1,6 @@
 package com.woongi.data.local.room.convert
 
+import androidx.room.Delete
 import androidx.room.ProvidedTypeConverter
 import androidx.room.TypeConverter
 import com.google.gson.Gson
@@ -8,6 +9,7 @@ import com.woongi.domain.point.entity.Line
 import com.woongi.domain.point.entity.Path
 import com.woongi.domain.point.entity.Point
 
+@Deprecated("사용안됨")
 @ProvidedTypeConverter
 class Converts(private val gson: Gson) {
 
