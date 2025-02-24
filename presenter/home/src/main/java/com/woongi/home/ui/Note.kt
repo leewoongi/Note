@@ -15,8 +15,6 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.unit.dp
-import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.home.MainViewModel
 import com.woongi.home.model.constants.DrawingType
@@ -28,6 +26,8 @@ fun Note(
     viewModel: MainViewModel
 ){
     var currentPath by remember { mutableStateOf(Path()) }
+    var erasePath by remember { mutableStateOf<Offset?>(null) }
+    val type by viewModel.drawingType.collectAsState()
     val path by viewModel.paths.collectAsState()
 
     Canvas(
@@ -35,35 +35,48 @@ fun Note(
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { dragAmount: Offset ->
-                        currentPath = Path().apply {
-                            addPath(currentPath)
-                            moveTo(dragAmount.x, dragAmount.y)
-                        }
+                        if(type == DrawingType.DRAWING) {
+                            currentPath = Path().apply {
+                                addPath(currentPath)
+                                moveTo(dragAmount.x, dragAmount.y)
+                            }
 
-                        // room에 저장할 데이터
-                        viewModel.recordPoint(
-                            type = PathType.MOVE_TO,
-                            currentX = dragAmount.x,
-                            currentY = dragAmount.y
-                        )
+                            // room에 저장할 데이터
+                            viewModel.recordPoint(
+                                type = PathType.MOVE_TO,
+                                currentX = dragAmount.x,
+                                currentY = dragAmount.y
+                            )
+                        } else {
+                            erasePath = Offset(dragAmount.x, dragAmount.y)
+                        }
                     },
                     onDragEnd = {
-                        viewModel.addPath()
-                        viewModel.recordLine()
-                        currentPath = Path()
+                        if(type == DrawingType.DRAWING) {
+                            viewModel.addPath()
+                            viewModel.recordLine()
+                            currentPath = Path()
+                        } else {
+                            erasePath = null
+                        }
                     },
 
                     onDragCancel = {  },
                     onDrag = { change: PointerInputChange, dragAmount: Offset ->
-                        currentPath = Path().apply {
-                            addPath(currentPath)
-                            lineTo(change.position.x, change.position.y)
+                        if(type == DrawingType.DRAWING) {
+                            currentPath = Path().apply {
+                                addPath(currentPath)
+                                lineTo(change.position.x, change.position.y)
+                            }
+                            viewModel.recordPoint(
+                                type = PathType.LINE_TO,
+                                currentX = change.position.x,
+                                currentY = change.position.y
+                            )
+                        } else {
+                            erasePath = Offset(change.position.x, change.position.y)
+                            viewModel.erase(change.position.x, change.position.y)
                         }
-                        viewModel.recordPoint(
-                            type = PathType.LINE_TO,
-                            currentX = change.position.x,
-                            currentY = change.position.y
-                        )
                         change.consume()
                     }
                 )

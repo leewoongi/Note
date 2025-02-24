@@ -133,7 +133,13 @@ class MainViewModel
         currentX: Float,
         currentY: Float
     ) {
+        val threshold = 20f // 지우개 지름
 
+        _paths.value = _paths.value.filterNot { path ->
+            path.line.any { point ->
+                distanceBetween(currentX, currentY, point.pointX, point.pointY) < threshold
+            }
+        }
     }
 
     // 지우개 중심좌표(현재 좌표) 에서 point들의 거리 구하기
