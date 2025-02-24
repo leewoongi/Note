@@ -28,6 +28,7 @@ fun Note(
     viewModel: MainViewModel
 ){
     var currentPath by remember { mutableStateOf(Path()) }
+    val path by viewModel.paths.collectAsState()
 
     Canvas(
         modifier = modifier
@@ -69,7 +70,7 @@ fun Note(
             }
     ){
         // 기존에 그린 선
-        viewModel.paths.forEach { path ->
+        path.forEach { path ->
             val line = Path()
             path.line.forEach { point ->
                 when(point.type){

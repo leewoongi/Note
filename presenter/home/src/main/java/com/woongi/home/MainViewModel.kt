@@ -1,14 +1,7 @@
 package com.woongi.home
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.graphics.AndroidPath
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.util.fastForEachReversed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Line
@@ -21,6 +14,7 @@ import com.woongi.home.model.uiModel.PathUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -36,20 +30,20 @@ class MainViewModel
     private val _drawingType = MutableStateFlow(DrawingType.DRAWING)
     val drawingType = _drawingType.asStateFlow()
 
-    private val _paths = mutableStateListOf<PathUiModel>()
-    val paths: List<PathUiModel> get() = _paths
+    private val _paths = MutableStateFlow<List<PathUiModel>>(emptyList())
+    val paths: StateFlow<List<PathUiModel>> get() = _paths.asStateFlow()
 
     private val _points: MutableList<Point> = mutableListOf()
     private val _lines: MutableList<Line> = mutableListOf()
 
-    private val _thickness = mutableFloatStateOf(1f)
-    val thickness: State<Float> get() = _thickness
+    private val _thickness = MutableStateFlow(1f)
+    val thickness: StateFlow<Float> get() = _thickness.asStateFlow()
 
-    private val _opacity = mutableFloatStateOf(1f)
-    val opacity: State<Float> get() = _opacity
+    private val _opacity = MutableStateFlow(1f)
+    val opacity: StateFlow<Float> get() = _opacity.asStateFlow()
 
-    private val _color = mutableIntStateOf(Color.Black.toArgb())
-    val color: State<Int> get() = _color
+    private val _color = MutableStateFlow(Color.Black.toArgb())
+    val color: StateFlow<Int> get() = _color.asStateFlow()
 
     private val _navigate = MutableSharedFlow<NavigationEvent>()
     val navigate = _navigate.asSharedFlow()
@@ -58,22 +52,20 @@ class MainViewModel
     val snackBar = _snackBar.asSharedFlow()
 
     fun updateThickness(thickness: Float) {
-        _thickness.floatValue = thickness
+        _thickness.value = thickness
     }
 
     fun updateOpacity(opacity: Float) {
-        _opacity.floatValue = opacity
+        _opacity.value = opacity
     }
 
     // 캔버스에 그리는 용도
     fun addPath() {
-        _paths.add(
-            PathUiModel(
-                line = _points.toList(), // 선은 점의 모임
-                color = Color(color.value),
-                thickness = _thickness.floatValue,
-                opacity = 1f
-            )
+        _paths.value += PathUiModel(
+            line = _points.toList(), // 선은 점의 모임
+            color = Color(color.value),
+            thickness = _thickness.value,
+            opacity = 1f
         )
     }
 
@@ -117,7 +109,7 @@ class MainViewModel
             blue = (color.blue * brightness).coerceIn(0f, 1f),
             alpha = opacity
         )
-        _color.intValue = newColor.toArgb()
+        _color.value  = newColor.toArgb()
     }
 
     // 지우기 그리기 모드가 있음
