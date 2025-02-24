@@ -1,22 +1,21 @@
 package com.woongi.home
 
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.AndroidPath
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.util.fastForEachReversed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.gson.Gson
 import com.woongi.domain.point.entity.Line
 import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
+import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.constants.NavigationEvent
 import com.woongi.home.model.uiModel.PathUiModel
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,6 +25,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.math.sqrt
 
 @HiltViewModel
 class MainViewModel
@@ -33,13 +33,14 @@ class MainViewModel
     private val saveUseCase: SaveUseCase
 ) : ViewModel() {
 
+    private val _drawingType = MutableStateFlow(DrawingType.DRAWING)
+    val drawingType = _drawingType.asStateFlow()
 
     private val _paths = mutableStateListOf<PathUiModel>()
     val paths: List<PathUiModel> get() = _paths
 
     private val _points: MutableList<Point> = mutableListOf()
     private val _lines: MutableList<Line> = mutableListOf()
-
 
     private val _thickness = mutableFloatStateOf(1f)
     val thickness: State<Float> get() = _thickness
@@ -65,15 +66,12 @@ class MainViewModel
     }
 
     // 캔버스에 그리는 용도
-    fun addPath(
-        path: AndroidPath,
-        thickness: Float
-    ) {
+    fun addPath() {
         _paths.add(
             PathUiModel(
-                path = path,
-                color = Color(color.value), // 임시 색상
-                thickness = thickness,
+                line = _points.toList(), // 선은 점의 모임
+                color = Color(color.value),
+                thickness = _thickness.floatValue,
                 opacity = 1f
             )
         )
@@ -95,7 +93,7 @@ class MainViewModel
     }
 
     // 선 데이터 기록
-    fun recordLine(){
+    fun recordLine() {
         _lines.add(
             Line(
                 thickness = thickness.value,
@@ -115,23 +113,63 @@ class MainViewModel
     ) {
         val newColor = color.copy(
             red = (color.red * brightness).coerceIn(0f, 1f),
-            green = (color.green  * brightness).coerceIn(0f, 1f),
-            blue  = (color.blue  * brightness).coerceIn(0f, 1f),
+            green = (color.green * brightness).coerceIn(0f, 1f),
+            blue = (color.blue * brightness).coerceIn(0f, 1f),
             alpha = opacity
         )
         _color.intValue = newColor.toArgb()
     }
 
+    // 지우기 그리기 모드가 있음
+    fun updateMode(type: DrawingType) {
+        _drawingType.value = type
+    }
+
+    // 이전 상태로
+    fun undo() {
+
+    }
+
+    // 복구
+    fun redo() {
+
+    }
+
+    // 선 지우기
+    // 겹친 경우에는 다 지워지기
+    fun erase(
+        currentX: Float,
+        currentY: Float
+    ) {
+
+    }
+
+    // 지우개 중심좌표(현재 좌표) 에서 point들의 거리 구하기
+    private fun distanceBetween(
+        currentX: Float,
+        currentY: Float,
+        pointX: Float,
+        pointY: Float
+    ): Float {
+        return sqrt(
+            ((pointX - currentX) * (pointX - currentX) + (pointY - currentY) * (pointY - currentY))
+                .toDouble()
+        )
+            .toFloat()
+    }
+
+
     fun save() {
         viewModelScope.launch {
-            if(_lines.isEmpty()) {
+            if (_lines.isEmpty()) {
                 _snackBar.emit("저장할 데이터가 없습니다.")
                 return@launch
             }
 
-            try{
+            try {
                 saveUseCase.save(
                     com.woongi.domain.point.entity.Path(
+                        title = "TEST TEST TEST",
                         path = _lines
                     )
                 )
