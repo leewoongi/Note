@@ -133,7 +133,7 @@ class MainViewModel
         currentX: Float,
         currentY: Float
     ) {
-        val threshold = 20f // 지우개 지름
+        val threshold = 30f // 지우개 지름 나중에 사이즈 조절 가능하게 해야함
 
         _paths.value = _paths.value.filterNot { path ->
             path.line.any { point ->

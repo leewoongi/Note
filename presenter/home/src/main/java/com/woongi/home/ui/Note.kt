@@ -100,10 +100,27 @@ fun Note(
         }
 
         // 현재 그려지고 있는 선
-        drawPath(
-            path = currentPath,
-            color = Color(viewModel.color.value),
-            style = Stroke(width = viewModel.thickness.value) // 선 두께 설정
-        )
+        if(type == DrawingType.DRAWING) {
+            drawPath(
+                path = currentPath,
+                color = Color(viewModel.color.value),
+                style = Stroke(width = viewModel.thickness.value) // 선 두께 설정
+            )
+        } else {
+            erasePath?.let {
+                drawCircle(
+                    color = Color.Gray.copy(alpha = 0.6f), // 외곽선 색상
+                    radius = 30f, // 외곽선 반경 (내부보다 크게 설정)
+                    center = Offset(erasePath!!.x, erasePath!!.y),
+                    style = Stroke(width = 5f) // 외곽선 두께
+                )
+
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.5f), // 내부 빨간색 반투명
+                    radius = 25f, // 내부 반경
+                    center = Offset(erasePath!!.x, erasePath!!.y)
+                )
+            }
+        }
     }
 }
