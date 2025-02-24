@@ -5,20 +5,21 @@ import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.AndroidPath
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.dp
+import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.home.MainViewModel
+import com.woongi.home.model.constants.DrawingType
 
 
 @Composable
@@ -26,14 +27,14 @@ fun Note(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel
 ){
-    var currentPath by remember { mutableStateOf(AndroidPath()) }
+    var currentPath by remember { mutableStateOf(Path()) }
 
     Canvas(
         modifier = modifier
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { dragAmount: Offset ->
-                        currentPath = AndroidPath().apply {
+                        currentPath = Path().apply {
                             addPath(currentPath)
                             moveTo(dragAmount.x, dragAmount.y)
                         }
@@ -46,14 +47,14 @@ fun Note(
                         )
                     },
                     onDragEnd = {
-                        viewModel.addPath(currentPath, viewModel.thickness.value)
+                        viewModel.addPath()
                         viewModel.recordLine()
-                        currentPath = AndroidPath()
+                        currentPath = Path()
                     },
 
                     onDragCancel = {  },
                     onDrag = { change: PointerInputChange, dragAmount: Offset ->
-                        currentPath = AndroidPath().apply {
+                        currentPath = Path().apply {
                             addPath(currentPath)
                             lineTo(change.position.x, change.position.y)
                         }
@@ -68,11 +69,19 @@ fun Note(
             }
     ){
         // 기존에 그린 선
-        viewModel.paths.forEach {
+        viewModel.paths.forEach { path ->
+            val line = Path()
+            path.line.forEach { point ->
+                when(point.type){
+                    PathType.MOVE_TO -> { line.moveTo(point.pointX, point.pointY) }
+                    PathType.LINE_TO -> { line.lineTo(point.pointX, point.pointY) }
+                }
+            }
+
             drawPath(
-                path = it.path,
-                color = it.color,
-                style = Stroke(it.thickness)
+                path = line,
+                color = path.color,
+                style = Stroke(path.thickness)
             )
         }
 

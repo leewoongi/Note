@@ -15,7 +15,6 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,6 +26,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.woongi.detail.DetailActivity
+import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.constants.NavigationEvent
 import com.woongi.home.ui.Note
 import com.woongi.home.ui.Toolbar
@@ -86,10 +86,16 @@ fun MyAppScreen(
                         .fillMaxWidth()
                         .background(Color.White)
                         .height(56.dp),
+                    onErase = { viewModel.updateMode(DrawingType.ERASE) },
+                    onUndo = { viewModel.undo() },
+                    onRedo = { viewModel.redo() },
                     onClickPlatte = { isColorPopupVisible = true },
                     onClickDownload = { viewModel.save() },
                     onClickLoad = { viewModel.navigateDetail() },
-                    onClickDrawing = { isPropertyPopupVisible = true }
+                    onClickDrawing = {
+                        viewModel.updateMode(DrawingType.DRAWING)
+                        isPropertyPopupVisible = true
+                    }
                 )
 
                 Note(

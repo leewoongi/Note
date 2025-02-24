@@ -1,6 +1,5 @@
 package com.woongi.home.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -22,6 +21,9 @@ import com.woongi.core.extension.singleClick
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
+    onErase: () -> Unit = {},
+    onUndo: () -> Unit = {},
+    onRedo: () -> Unit = {},
     onClickPlatte: () -> Unit = {},
     onClickDownload: () -> Unit = {},
     onClickLoad: () -> Unit = {},
@@ -38,6 +40,42 @@ fun Toolbar(
                 .align(Alignment.CenterEnd),
             horizontalArrangement = Arrangement.End
         ) {
+
+            Icon(
+                modifier = Modifier
+                    .singleClick(
+                        onSingleClick = { onErase() }
+                    ),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_erase),
+                contentDescription = "erase",
+                tint = Color.Black,
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Icon(
+                modifier = Modifier
+                    .singleClick(
+                        onSingleClick = { onUndo() }
+                    ),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_undo),
+                contentDescription = "undo",
+                tint = Color.Black,
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Icon(
+                modifier = Modifier
+                    .singleClick(
+                        onSingleClick = { onRedo() }
+                    ),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_redo),
+                contentDescription = "redo",
+                tint = Color.Black,
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
                 modifier = Modifier
