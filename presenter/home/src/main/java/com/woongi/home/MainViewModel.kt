@@ -143,9 +143,7 @@ class MainViewModel
                 _paths.value = _paths.value.filterNot { it.id == lastLine.path.id }
             }
             is UndoRedoPath.Erase -> {
-                lastLine.paths.forEach { line ->
-                    _paths.value = (_paths.value + lastLine.paths).sortedBy { it.id }
-                }
+                _paths.value = (_paths.value + lastLine.paths).sortedBy { it.id }
             }
         }
     }
