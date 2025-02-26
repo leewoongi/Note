@@ -1,10 +1,12 @@
 package com.woongi.home
 
+import android.location.Location.distanceBetween
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Line
+import com.woongi.domain.point.entity.Path
 import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
@@ -32,6 +34,12 @@ class MainViewModel
 
     private val _paths = MutableStateFlow<List<PathUiModel>>(emptyList())
     val paths: StateFlow<List<PathUiModel>> get() = _paths.asStateFlow()
+
+    private val _undo = MutableStateFlow<List<PathUiModel>>(emptyList())
+    val undo: StateFlow<List<PathUiModel>> get() = _undo.asStateFlow()
+
+    private val _redo = MutableStateFlow<List<PathUiModel>>(emptyList())
+    val redo: StateFlow<List<PathUiModel>> get() = _redo.asStateFlow()
 
     private val _points: MutableList<Point> = mutableListOf()
     private val _lines: MutableList<Line> = mutableListOf()
@@ -61,7 +69,9 @@ class MainViewModel
 
     // 캔버스에 그리는 용도
     fun addPath() {
+        val id = _paths.value.size
         _paths.value += PathUiModel(
+            id = id,
             line = _points.toList(), // 선은 점의 모임
             color = Color(color.value),
             thickness = _thickness.value,
@@ -135,10 +145,18 @@ class MainViewModel
     ) {
         val threshold = 30f // 지우개 지름 나중에 사이즈 조절 가능하게 해야함
 
-        _paths.value = _paths.value.filterNot { path ->
+        val erased = _paths.value.filter {path ->
             path.line.any { point ->
                 distanceBetween(currentX, currentY, point.pointX, point.pointY) < threshold
             }
+
+        }
+
+        _undo.value += erased
+        _redo.value = emptyList()
+
+        erased.forEach { line ->
+            _paths.value = _paths.value.filter { it != line }
         }
     }
 
@@ -150,10 +168,8 @@ class MainViewModel
         pointY: Float
     ): Float {
         return sqrt(
-            ((pointX - currentX) * (pointX - currentX) + (pointY - currentY) * (pointY - currentY))
-                .toDouble()
-        )
-            .toFloat()
+            ((pointX - currentX) * (pointX - currentX) + (pointY - currentY) * (pointY - currentY)).toDouble()
+        ).toFloat()
     }
 
 
@@ -166,7 +182,7 @@ class MainViewModel
 
             try {
                 saveUseCase.save(
-                    com.woongi.domain.point.entity.Path(
+                    Path(
                         title = "TEST TEST TEST",
                         path = _lines
                     )
