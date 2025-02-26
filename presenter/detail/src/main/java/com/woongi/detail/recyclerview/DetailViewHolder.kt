@@ -1,12 +1,14 @@
 package com.woongi.detail.recyclerview
 
-import android.graphics.Path
 import android.view.View
 import android.widget.TextView
+import androidx.compose.ui.graphics.AndroidPath
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.woongi.core.extension.dpToPx
 import com.woongi.detail.R
+import com.woongi.detail.model.PathProperties
 import com.woongi.detail.ui.CanvasView
+import com.woongi.domain.point.entity.Path
 import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 
@@ -17,7 +19,7 @@ internal class DetailViewHolder(
     private lateinit var textView: TextView
 
     fun bind(
-        path: com.woongi.domain.point.entity.Path,
+        path: Path,
         onClick: () -> Unit
     ) {
         canvasView = view.findViewById(R.id.canvas)
@@ -35,9 +37,9 @@ internal class DetailViewHolder(
         val scaleY = targetSize / (maxY - minY)
 
 
-        val pair: MutableList<Triple<Path, Float, Int>> = mutableListOf()
+        val properties: MutableList<PathProperties> = mutableListOf()
         path.path.forEach { line ->
-            val paths = Path()
+            val paths = AndroidPath()
             line.points.forEach { point: Point ->
                 when (point.type) {
                     PathType.MOVE_TO -> {
@@ -55,10 +57,16 @@ internal class DetailViewHolder(
                     }
                 }
             }
-            pair.add(Triple(paths, line.thickness, line.color))
+            properties.add(
+                PathProperties(
+                    path = paths,
+                    thickness = line.thickness,
+                    color = line.color
+                )
+            )
         }
 
-        canvasView.setPath(pair)
+        canvasView.setPath(properties)
         textView.text = "TEST TEST TEST"
         view.rootView.setOnClickListener {
             onClick()

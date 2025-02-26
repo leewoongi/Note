@@ -4,9 +4,9 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
+import com.woongi.detail.model.PathProperties
 
 class CanvasView
 @JvmOverloads constructor(
@@ -14,14 +14,13 @@ class CanvasView
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-    // path와 현재는 thickness 정보만 가지고 있음
-    private val paths = mutableListOf<Triple<Path, Float, Int>>()
+=    private val paths = mutableListOf<PathProperties>()
     private val paint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.STROKE
     }
 
-    fun setPath(newPaths: MutableList<Triple<Path, Float, Int>>) {
+    fun setPath(newPaths: MutableList<PathProperties>) {
         paths.clear()
         paths.addAll(newPaths)
         invalidate()
