@@ -19,5 +19,5 @@ interface LineDao {
 
     @Transaction
     @Query("SELECT * FROM lines")
-    fun getLinesWithPoints(): List<LineWithPoints>
+    suspend fun getLinesWithPoints(): List<LineWithPoints>
 }
