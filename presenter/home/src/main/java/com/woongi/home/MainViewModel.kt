@@ -13,6 +13,7 @@ import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.constants.NavigationEvent
 import com.woongi.home.model.uiModel.PathUiModel
+import com.woongi.home.model.uiModel.UndoRedoPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,11 +36,11 @@ class MainViewModel
     private val _paths = MutableStateFlow<List<PathUiModel>>(emptyList())
     val paths: StateFlow<List<PathUiModel>> get() = _paths.asStateFlow()
 
-    private val _undo = MutableStateFlow<List<PathUiModel>>(emptyList())
-    val undo: StateFlow<List<PathUiModel>> get() = _undo.asStateFlow()
+    private val _undo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
+    val undo: StateFlow<List<UndoRedoPath>> get() = _undo.asStateFlow()
 
-    private val _redo = MutableStateFlow<List<PathUiModel>>(emptyList())
-    val redo: StateFlow<List<PathUiModel>> get() = _redo.asStateFlow()
+    private val _redo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
+    val redo: StateFlow<List<UndoRedoPath>> get() = _redo.asStateFlow()
 
     private val _points: MutableList<Point> = mutableListOf()
     private val _lines: MutableList<Line> = mutableListOf()
@@ -70,13 +71,17 @@ class MainViewModel
     // 캔버스에 그리는 용도
     fun addPath() {
         val id = _paths.value.size
-        _paths.value += PathUiModel(
+        val newPath = PathUiModel(
             id = id,
             line = _points.toList(), // 선은 점의 모임
             color = Color(color.value),
             thickness = _thickness.value,
             opacity = 1f
         )
+
+        _paths.value += newPath
+        _undo.value += UndoRedoPath.Draw(newPath)
+        _redo.value = emptyList()
     }
 
     // 점 데이터 기록
@@ -129,12 +134,38 @@ class MainViewModel
 
     // 이전 상태로
     fun undo() {
+        val lastLine = _undo.value.last()
+        _undo.value = _undo.value.dropLast(1)
+        _redo.value += lastLine
 
+        when(lastLine){
+            is UndoRedoPath.Draw -> {
+                _paths.value = _paths.value.filterNot { it.id == lastLine.path.id }
+            }
+            is UndoRedoPath.Erase -> {
+                lastLine.paths.forEach { line ->
+                    _paths.value = (_paths.value + lastLine.paths).sortedBy { it.id }
+                }
+            }
+        }
     }
 
     // 복구
     fun redo() {
+        val lastLine = _redo.value.last()
+        _redo.value = _redo.value.dropLast(1)
+        _undo.value += lastLine
 
+        when(lastLine){
+            is UndoRedoPath.Draw -> {
+                _paths.value += lastLine.path
+            }
+            is UndoRedoPath.Erase -> {
+                lastLine.paths.forEach { line ->
+                    _paths.value = _paths.value.filter { it.id != line.id }
+                }
+            }
+        }
     }
 
     // 선 지우기
@@ -145,18 +176,17 @@ class MainViewModel
     ) {
         val threshold = 30f // 지우개 지름 나중에 사이즈 조절 가능하게 해야함
 
-        val erased = _paths.value.filter {path ->
+        // 지워야 할 경로를 찾기
+        val erased = _paths.value.filter { path ->
             path.line.any { point ->
                 distanceBetween(currentX, currentY, point.pointX, point.pointY) < threshold
             }
-
         }
 
-        _undo.value += erased
-        _redo.value = emptyList()
-
-        erased.forEach { line ->
-            _paths.value = _paths.value.filter { it != line }
+        if (erased.isNotEmpty()) {
+            _undo.value += UndoRedoPath.Erase(erased)
+            _redo.value = emptyList()
+            _paths.value = _paths.value.filter { path -> path !in erased }
         }
     }
 
