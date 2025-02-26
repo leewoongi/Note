@@ -9,6 +9,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,18 +19,19 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.woongi.core.R
 import com.woongi.core.extension.singleClick
+import com.woongi.home.MainViewModel
+import com.woongi.home.model.constants.DrawingType
 
 @Composable
 fun Toolbar(
     modifier: Modifier = Modifier,
-    onErase: () -> Unit = {},
-    onUndo: () -> Unit = {},
-    onRedo: () -> Unit = {},
+    viewModel: MainViewModel,
     onClickPlatte: () -> Unit = {},
-    onClickDownload: () -> Unit = {},
-    onClickLoad: () -> Unit = {},
-    onClickDrawing: () -> Unit = {}
+    onClickDrawing: () -> Unit = {},
 ) {
+    val undo by viewModel.undo.collectAsState()
+    val redo by viewModel.redo.collectAsState()
+
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,
@@ -44,7 +47,7 @@ fun Toolbar(
             Icon(
                 modifier = Modifier
                     .singleClick(
-                        onSingleClick = { onErase() }
+                        onSingleClick = { viewModel.updateMode(DrawingType.ERASE) }
                     ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_erase),
                 contentDescription = "erase",
@@ -54,25 +57,27 @@ fun Toolbar(
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = Modifier
-                    .singleClick(
-                        onSingleClick = { onUndo() }
-                    ),
+                modifier = if(undo.isEmpty()) {
+                    Modifier
+                } else {
+                    Modifier.singleClick( onSingleClick = { viewModel.undo() } )
+                },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_undo),
                 contentDescription = "undo",
-                tint = Color.Black,
+                tint = if(undo.isEmpty()) Color.Gray else Color.Black,
             )
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = Modifier
-                    .singleClick(
-                        onSingleClick = { onRedo() }
-                    ),
+                modifier = if(redo.isEmpty()) {
+                    Modifier
+                } else {
+                    Modifier.singleClick( onSingleClick = { viewModel.redo() } )
+                },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_redo),
                 contentDescription = "redo",
-                tint = Color.Black,
+                tint = if(redo.isEmpty()) Color.Gray else Color.Black,
             )
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -92,7 +97,10 @@ fun Toolbar(
             Icon(
                 modifier = Modifier
                     .singleClick(
-                        onSingleClick = { onClickDrawing() }
+                        onSingleClick = {
+                            viewModel.updateMode(DrawingType.DRAWING)
+                            onClickDrawing()
+                        }
                     ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_drawing),
                 contentDescription = "download",
@@ -104,7 +112,7 @@ fun Toolbar(
             Icon(
                 modifier = Modifier
                     .singleClick(
-                        onSingleClick = { onClickLoad() }
+                        onSingleClick = { viewModel.navigateDetail() }
                     ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_load),
                 contentDescription = "download",
@@ -116,7 +124,7 @@ fun Toolbar(
             Icon(
                 modifier = Modifier
                     .singleClick(
-                        onSingleClick = { onClickDownload() }
+                        onSingleClick = { viewModel.save() }
                     ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_download),
                 contentDescription = "download",
