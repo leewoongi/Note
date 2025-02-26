@@ -15,6 +15,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,6 +47,9 @@ fun MyAppScreen(
     val coroutineScope = rememberCoroutineScope()
     var isPropertyPopupVisible by remember { mutableStateOf(false) }
     var isColorPopupVisible by remember { mutableStateOf(false) }
+
+    val thickness by viewModel.thickness.collectAsState()
+    val opacity by viewModel.opacity.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.navigate.collect { event ->
@@ -86,16 +90,9 @@ fun MyAppScreen(
                         .fillMaxWidth()
                         .background(Color.White)
                         .height(56.dp),
-                    onErase = { viewModel.updateMode(DrawingType.ERASE) },
-                    onUndo = { viewModel.undo() },
-                    onRedo = { viewModel.redo() },
+                    viewModel = viewModel,
                     onClickPlatte = { isColorPopupVisible = true },
-                    onClickDownload = { viewModel.save() },
-                    onClickLoad = { viewModel.navigateDetail() },
-                    onClickDrawing = {
-                        viewModel.updateMode(DrawingType.DRAWING)
-                        isPropertyPopupVisible = true
-                    }
+                    onClickDrawing = { isPropertyPopupVisible = true }
                 )
 
                 Note(
@@ -121,8 +118,8 @@ fun MyAppScreen(
                         isPropertyPopupVisible = false
                     },
                     icon = Icons.Default.Close,
-                    thickness = viewModel.thickness.value,
-                    opacity = viewModel.opacity.value
+                    thickness = thickness,
+                    opacity = opacity
                 )
             }
 

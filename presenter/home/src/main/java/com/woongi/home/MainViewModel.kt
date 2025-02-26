@@ -1,26 +1,23 @@
 package com.woongi.home
 
-import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.ui.graphics.AndroidPath
+import android.location.Location.distanceBetween
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.util.fastForEachReversed
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Line
+import com.woongi.domain.point.entity.Path
 import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.constants.NavigationEvent
 import com.woongi.home.model.uiModel.PathUiModel
+import com.woongi.home.model.uiModel.UndoRedoPath
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -36,20 +33,26 @@ class MainViewModel
     private val _drawingType = MutableStateFlow(DrawingType.DRAWING)
     val drawingType = _drawingType.asStateFlow()
 
-    private val _paths = mutableStateListOf<PathUiModel>()
-    val paths: List<PathUiModel> get() = _paths
+    private val _paths = MutableStateFlow<List<PathUiModel>>(emptyList())
+    val paths: StateFlow<List<PathUiModel>> get() = _paths.asStateFlow()
+
+    private val _undo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
+    val undo: StateFlow<List<UndoRedoPath>> get() = _undo.asStateFlow()
+
+    private val _redo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
+    val redo: StateFlow<List<UndoRedoPath>> get() = _redo.asStateFlow()
 
     private val _points: MutableList<Point> = mutableListOf()
     private val _lines: MutableList<Line> = mutableListOf()
 
-    private val _thickness = mutableFloatStateOf(1f)
-    val thickness: State<Float> get() = _thickness
+    private val _thickness = MutableStateFlow(1f)
+    val thickness: StateFlow<Float> get() = _thickness.asStateFlow()
 
-    private val _opacity = mutableFloatStateOf(1f)
-    val opacity: State<Float> get() = _opacity
+    private val _opacity = MutableStateFlow(1f)
+    val opacity: StateFlow<Float> get() = _opacity.asStateFlow()
 
-    private val _color = mutableIntStateOf(Color.Black.toArgb())
-    val color: State<Int> get() = _color
+    private val _color = MutableStateFlow(Color.Black.toArgb())
+    val color: StateFlow<Int> get() = _color.asStateFlow()
 
     private val _navigate = MutableSharedFlow<NavigationEvent>()
     val navigate = _navigate.asSharedFlow()
@@ -58,23 +61,27 @@ class MainViewModel
     val snackBar = _snackBar.asSharedFlow()
 
     fun updateThickness(thickness: Float) {
-        _thickness.floatValue = thickness
+        _thickness.value = thickness
     }
 
     fun updateOpacity(opacity: Float) {
-        _opacity.floatValue = opacity
+        _opacity.value = opacity
     }
 
     // 캔버스에 그리는 용도
     fun addPath() {
-        _paths.add(
-            PathUiModel(
-                line = _points.toList(), // 선은 점의 모임
-                color = Color(color.value),
-                thickness = _thickness.floatValue,
-                opacity = 1f
-            )
+        val id = _paths.value.size
+        val newPath = PathUiModel(
+            id = id,
+            line = _points.toList(), // 선은 점의 모임
+            color = Color(color.value),
+            thickness = _thickness.value,
+            opacity = 1f
         )
+
+        _paths.value += newPath
+        _undo.value += UndoRedoPath.Draw(newPath)
+        _redo.value = emptyList()
     }
 
     // 점 데이터 기록
@@ -117,7 +124,7 @@ class MainViewModel
             blue = (color.blue * brightness).coerceIn(0f, 1f),
             alpha = opacity
         )
-        _color.intValue = newColor.toArgb()
+        _color.value  = newColor.toArgb()
     }
 
     // 지우기 그리기 모드가 있음
@@ -127,12 +134,36 @@ class MainViewModel
 
     // 이전 상태로
     fun undo() {
+        val lastLine = _undo.value.last()
+        _undo.value = _undo.value.dropLast(1)
+        _redo.value += lastLine
 
+        when(lastLine){
+            is UndoRedoPath.Draw -> {
+                _paths.value = _paths.value.filterNot { it.id == lastLine.path.id }
+            }
+            is UndoRedoPath.Erase -> {
+                _paths.value = (_paths.value + lastLine.paths).sortedBy { it.id }
+            }
+        }
     }
 
     // 복구
     fun redo() {
+        val lastLine = _redo.value.last()
+        _redo.value = _redo.value.dropLast(1)
+        _undo.value += lastLine
 
+        when(lastLine){
+            is UndoRedoPath.Draw -> {
+                _paths.value += lastLine.path
+            }
+            is UndoRedoPath.Erase -> {
+                lastLine.paths.forEach { line ->
+                    _paths.value = _paths.value.filter { it.id != line.id }
+                }
+            }
+        }
     }
 
     // 선 지우기
@@ -141,7 +172,20 @@ class MainViewModel
         currentX: Float,
         currentY: Float
     ) {
+        val threshold = 30f // 지우개 지름 나중에 사이즈 조절 가능하게 해야함
 
+        // 지워야 할 경로를 찾기
+        val erased = _paths.value.filter { path ->
+            path.line.any { point ->
+                distanceBetween(currentX, currentY, point.pointX, point.pointY) < threshold
+            }
+        }
+
+        if (erased.isNotEmpty()) {
+            _undo.value += UndoRedoPath.Erase(erased)
+            _redo.value = emptyList()
+            _paths.value = _paths.value.filter { path -> path !in erased }
+        }
     }
 
     // 지우개 중심좌표(현재 좌표) 에서 point들의 거리 구하기
@@ -152,10 +196,8 @@ class MainViewModel
         pointY: Float
     ): Float {
         return sqrt(
-            ((pointX - currentX) * (pointX - currentX) + (pointY - currentY) * (pointY - currentY))
-                .toDouble()
-        )
-            .toFloat()
+            ((pointX - currentX) * (pointX - currentX) + (pointY - currentY) * (pointY - currentY)).toDouble()
+        ).toFloat()
     }
 
 
@@ -168,7 +210,7 @@ class MainViewModel
 
             try {
                 saveUseCase.save(
-                    com.woongi.domain.point.entity.Path(
+                    Path(
                         title = "TEST TEST TEST",
                         path = _lines
                     )
