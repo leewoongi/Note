@@ -14,7 +14,7 @@ class CanvasView
     attrs: AttributeSet? = null
 ) : View(context, attrs) {
 
-=    private val paths = mutableListOf<PathProperties>()
+    private val paths = mutableListOf<PathProperties>()
     private val paint = Paint().apply {
         color = Color.BLACK
         style = Paint.Style.STROKE

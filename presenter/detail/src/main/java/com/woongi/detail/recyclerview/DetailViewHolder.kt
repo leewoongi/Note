@@ -1,5 +1,6 @@
 package com.woongi.detail.recyclerview
 
+import android.graphics.Path
 import android.view.View
 import android.widget.TextView
 import androidx.compose.ui.graphics.AndroidPath
@@ -8,7 +9,6 @@ import com.woongi.core.extension.dpToPx
 import com.woongi.detail.R
 import com.woongi.detail.model.PathProperties
 import com.woongi.detail.ui.CanvasView
-import com.woongi.domain.point.entity.Path
 import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 
@@ -19,7 +19,7 @@ internal class DetailViewHolder(
     private lateinit var textView: TextView
 
     fun bind(
-        path: Path,
+        path: com.woongi.domain.point.entity.Path,
         onClick: () -> Unit
     ) {
         canvasView = view.findViewById(R.id.canvas)
@@ -39,7 +39,7 @@ internal class DetailViewHolder(
 
         val properties: MutableList<PathProperties> = mutableListOf()
         path.path.forEach { line ->
-            val paths = AndroidPath()
+            val paths = Path()
             line.points.forEach { point: Point ->
                 when (point.type) {
                     PathType.MOVE_TO -> {
