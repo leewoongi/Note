@@ -48,12 +48,12 @@ class DetailActivity : AppCompatActivity() {
     private fun init() {
         toolbar = findViewById(R.id.toolbar)
         faButton = findViewById(R.id.fab_add)
-        faButton.setOnClickListener { viewModel.navigateHome(NavigateItem(item = null)) }
+        faButton.setOnClickListener { viewModel.navigateHome() }
 
 
         recyclerView = findViewById(R.id.rv_detail)
-        recyclerViewAdapter = DetailRecyclerViewAdapter { path->
-           viewModel.navigateHome(NavigateItem(item = path))
+        recyclerViewAdapter = DetailRecyclerViewAdapter {
+           viewModel.navigateHome()
         }
 
         recyclerView.apply {
