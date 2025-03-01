@@ -12,6 +12,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        println("TEST TEST TEST mainActivity")
         WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             MyAppScreen()
