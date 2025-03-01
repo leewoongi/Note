@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Path
 import com.woongi.domain.point.usecase.GetUseCase
+import com.woongi.navigator.api.Destination
+import com.woongi.navigator.api.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -15,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class DetailViewModel
 @Inject constructor(
-    private val getUseCase: GetUseCase
+    private val getUseCase: GetUseCase,
+    private val navigator: Navigator
 ) : ViewModel() {
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
@@ -36,5 +39,9 @@ class DetailViewModel
                 _snackBar.emit("불러오기에 실패 했습니다.")
             }
         }
+    }
+
+    fun navigateHome() {
+        navigator.createIntent(Destination.Main)
     }
 }

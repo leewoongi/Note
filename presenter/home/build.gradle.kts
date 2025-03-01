@@ -7,5 +7,5 @@ android {
 }
 
 dependencies {
-    implementation(project(":presenter:detail"))
+    implementation(project(":presenter:navigator"))
 }

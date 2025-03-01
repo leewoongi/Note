@@ -11,9 +11,10 @@ import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
-import com.woongi.home.model.constants.NavigationEvent
 import com.woongi.home.model.uiModel.PathUiModel
 import com.woongi.home.model.uiModel.UndoRedoPath
+import com.woongi.navigator.api.Destination
+import com.woongi.navigator.api.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,7 +28,8 @@ import kotlin.math.sqrt
 @HiltViewModel
 class MainViewModel
 @Inject constructor(
-    private val saveUseCase: SaveUseCase
+    private val saveUseCase: SaveUseCase,
+    private val navigator: Navigator
 ) : ViewModel() {
 
     private val _drawingType = MutableStateFlow(DrawingType.DRAWING)
@@ -53,9 +55,6 @@ class MainViewModel
 
     private val _color = MutableStateFlow(Color.Black.toArgb())
     val color: StateFlow<Int> get() = _color.asStateFlow()
-
-    private val _navigate = MutableSharedFlow<NavigationEvent>()
-    val navigate = _navigate.asSharedFlow()
 
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
@@ -223,8 +222,6 @@ class MainViewModel
     }
 
     fun navigateDetail() {
-        viewModelScope.launch {
-            _navigate.emit(NavigationEvent.DETAIL)
-        }
+        navigator.createIntent(Destination.Detail)
     }
 }

@@ -1,6 +1,5 @@
 package com.woongi.home
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,9 +25,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.woongi.detail.DetailActivity
-import com.woongi.home.model.constants.DrawingType
-import com.woongi.home.model.constants.NavigationEvent
 import com.woongi.home.ui.Note
 import com.woongi.home.ui.Toolbar
 import com.woongi.home.ui.component.LinePropertiesDialog
@@ -50,19 +46,6 @@ fun MyAppScreen(
 
     val thickness by viewModel.thickness.collectAsState()
     val opacity by viewModel.opacity.collectAsState()
-
-    LaunchedEffect(Unit) {
-        viewModel.navigate.collect { event ->
-            when (event) {
-                is NavigationEvent.DETAIL -> {
-                    val intent = Intent(context, DetailActivity::class.java)
-                    context.startActivity(intent)
-                }
-
-                NavigationEvent.HOME -> {}
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.snackBar.collectLatest { message ->

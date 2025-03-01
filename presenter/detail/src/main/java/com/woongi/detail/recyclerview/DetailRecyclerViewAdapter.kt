@@ -2,6 +2,7 @@ package com.woongi.detail.recyclerview
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.woongi.detail.R
@@ -9,6 +10,7 @@ import com.woongi.domain.point.entity.Line
 import com.woongi.domain.point.entity.Path
 
 class DetailRecyclerViewAdapter(
+    private val onClick: () -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>()  {
     private val items = mutableListOf<Path>()
 
@@ -32,7 +34,7 @@ class DetailRecyclerViewAdapter(
         if(holder is DetailViewHolder){
             holder.bind(
                 path = items[position],
-                onClick = { }
+                onClick = { onClick() }
             )
         }
     }

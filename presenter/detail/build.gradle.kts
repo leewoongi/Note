@@ -5,3 +5,7 @@ plugins {
 android {
     namespace = "com.woongi.detail"
 }
+
+dependencies {
+    implementation(project(":presenter:navigator"))
+}

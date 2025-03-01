@@ -42,7 +42,9 @@ class DetailActivity : AppCompatActivity() {
 
     private fun init() {
         recyclerView = findViewById(R.id.rv_detail)
-        recyclerViewAdapter = DetailRecyclerViewAdapter()
+        recyclerViewAdapter = DetailRecyclerViewAdapter {
+            val intent = viewModel.navigateHome()
+        }
 
         recyclerView.apply {
             adapter = recyclerViewAdapter
