@@ -3,11 +3,14 @@ package com.woongi.detail
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.woongi.detail.recyclerview.DetailRecyclerViewAdapter
+import com.woongi.navigator.NavigateItem
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -16,6 +19,8 @@ import kotlinx.coroutines.launch
 class DetailActivity : AppCompatActivity() {
     private val viewModel: DetailViewModel by viewModels()
 
+    private lateinit var toolbar: Toolbar
+    private lateinit var faButton: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerViewAdapter: DetailRecyclerViewAdapter
 
@@ -41,9 +46,14 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun init() {
+        toolbar = findViewById(R.id.toolbar)
+        faButton = findViewById(R.id.fab_add)
+        faButton.setOnClickListener { viewModel.navigateHome(NavigateItem(item = null)) }
+
+
         recyclerView = findViewById(R.id.rv_detail)
-        recyclerViewAdapter = DetailRecyclerViewAdapter {
-            val intent = viewModel.navigateHome()
+        recyclerViewAdapter = DetailRecyclerViewAdapter { path->
+           viewModel.navigateHome(NavigateItem(item = path))
         }
 
         recyclerView.apply {
