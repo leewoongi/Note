@@ -23,6 +23,7 @@ import androidx.room.PrimaryKey
 )
 data class LineEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val lineId: Int,
     val thickness: Float,
     val opacity: Float,
     val color: Int,

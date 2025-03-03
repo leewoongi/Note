@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "48134dd8d51cf693e338758e2f60db50",
+    "identityHash": "0f0dabe50cbdc790d91a7332cd89594a",
     "entities": [
       {
         "tableName": "paths",
@@ -32,11 +32,17 @@
       },
       {
         "tableName": "lines",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `thickness` REAL NOT NULL, `opacity` REAL NOT NULL, `color` INTEGER NOT NULL, `pathId` INTEGER NOT NULL, FOREIGN KEY(`pathId`) REFERENCES `paths`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `lineId` INTEGER NOT NULL, `thickness` REAL NOT NULL, `opacity` REAL NOT NULL, `color` INTEGER NOT NULL, `pathId` INTEGER NOT NULL, FOREIGN KEY(`pathId`) REFERENCES `paths`(`id`) ON UPDATE NO ACTION ON DELETE CASCADE )",
         "fields": [
           {
             "fieldPath": "id",
             "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lineId",
+            "columnName": "lineId",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -146,7 +152,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '48134dd8d51cf693e338758e2f60db50')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '0f0dabe50cbdc790d91a7332cd89594a')"
     ]
   }
 }

@@ -29,6 +29,7 @@ class PathRepositoryImpl
                 path = lines.map { lineEntity ->
                     val points = pointDao.getPointsByLineId(lineEntity.id)
                     Line(
+                        id = lineEntity.lineId,
                         thickness = lineEntity.thickness,
                         opacity = lineEntity.opacity,
                         color = lineEntity.color,
@@ -52,6 +53,7 @@ class PathRepositoryImpl
         val pathId = pathDao.insert(pathEntity)
         path.path.forEach { line ->
             val lineEntity = LineEntity(
+                lineId = line.id,
                 pathId = pathId.toInt(),
                 thickness = line.thickness,
                 opacity = line.opacity,

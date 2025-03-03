@@ -10,7 +10,6 @@ import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
-import com.woongi.home.model.mapper.toLineUiModel
 import com.woongi.home.model.mapper.toListLineUiModel
 import com.woongi.home.model.mapper.toPathUiModel
 import com.woongi.home.model.uiModel.LineUiModel
@@ -68,23 +67,15 @@ class MainViewModel
         val item = navigateItem.item ?: return
 
         if(item is Path) {
-            _paths.value = item.toPathUiModel()
-            loadInitializeSaveData(item)
+            val path = item.toPathUiModel()
+            loadInitializeSaveData(path)
+            _paths.value = path
         }
     }
 
     // 저장된 데이터 불러 온 후 수정 하기 전에 초기화 작업
-    private fun loadInitializeSaveData(item: Path) {
-        _lines.addAll(item.path.toListLineUiModel() )
-        item.path.forEach { line ->
-            line.points.forEach { point ->
-                recordPoint(
-                    type = point.type,
-                    currentX = point.pointX,
-                    currentY = point.pointY
-                )
-            }
-        }
+    private fun loadInitializeSaveData(item: PathUiModel) {
+        _lines.addAll(item.lines)
     }
 
     fun updateThickness(thickness: Float) {
@@ -96,7 +87,7 @@ class MainViewModel
     }
 
     // 캔버스에 그리는 용도
-    fun drawPath() {
+    private fun drawPath() {
         _paths.value = _paths.value.copy(lines = _lines)
     }
 
@@ -119,19 +110,22 @@ class MainViewModel
     // 선 데이터 기록
     fun recordLine() {
         val id = _lines.size
+        val newColor = Color(_color.value)
+
         val newLine =  LineUiModel(
             id = id,
             points = _points.toList(), // 선은 점의 모임
-            color = Color(_color.value),
+            color = newColor,
             thickness = _thickness.value,
-            opacity = opacity.value
+            opacity = _opacity.value
         )
 
         _lines.add(newLine)
-
         _points.clear()
         _undo.value += UndoRedoPath.Draw(newLine)
         _redo.value = emptyList()
+
+        drawPath()
     }
 
 
