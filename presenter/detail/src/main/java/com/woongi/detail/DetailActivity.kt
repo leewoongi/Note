@@ -52,8 +52,8 @@ class DetailActivity : AppCompatActivity() {
 
 
         recyclerView = findViewById(R.id.rv_detail)
-        recyclerViewAdapter = DetailRecyclerViewAdapter {
-           viewModel.navigateHome()
+        recyclerViewAdapter = DetailRecyclerViewAdapter { path->
+           viewModel.navigateHome(item = path)
         }
 
         recyclerView.apply {

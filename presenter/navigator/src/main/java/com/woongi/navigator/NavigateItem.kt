@@ -1,5 +1,10 @@
 package com.woongi.navigator
 
-data class NavigateItem<T>(
-    val item: T? = null
-)
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+import kotlinx.parcelize.RawValue
+
+@Parcelize
+data class NavigateItem(
+    val item: @RawValue Any? = null
+) : Parcelable

@@ -53,7 +53,7 @@ fun Note(
                     },
                     onDragEnd = {
                         if(type == DrawingType.DRAWING) {
-                            viewModel.addPath()
+                            viewModel.addLine()
                             viewModel.recordLine()
                             currentPath = Path()
                         } else {

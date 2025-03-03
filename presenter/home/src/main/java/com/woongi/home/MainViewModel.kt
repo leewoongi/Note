@@ -1,6 +1,5 @@
 package com.woongi.home
 
-import android.location.Location.distanceBetween
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
@@ -13,6 +12,7 @@ import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.uiModel.PathUiModel
 import com.woongi.home.model.uiModel.UndoRedoPath
+import com.woongi.navigator.NavigateItem
 import com.woongi.navigator.api.Destination
 import com.woongi.navigator.api.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -59,6 +59,11 @@ class MainViewModel
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
 
+    fun setNavigateItem(navigateItem: NavigateItem) {
+        val item = navigateItem.item ?: return
+        println("TEST TEST TET setNavigateItem: $item")
+    }
+
     fun updateThickness(thickness: Float) {
         _thickness.value = thickness
     }
@@ -68,7 +73,7 @@ class MainViewModel
     }
 
     // 캔버스에 그리는 용도
-    fun addPath() {
+    fun addLine() {
         val id = _paths.value.size
         val newPath = PathUiModel(
             id = id,
@@ -222,6 +227,8 @@ class MainViewModel
     }
 
     fun navigateDetail() {
-        navigator.createIntent(Destination.Detail)
+        navigator.createIntent(Destination.Detail(
+            NavigateItem(item = null)
+        ))
     }
 }

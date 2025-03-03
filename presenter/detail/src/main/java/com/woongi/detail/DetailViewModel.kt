@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Path
 import com.woongi.domain.point.usecase.GetUseCase
+import com.woongi.navigator.NavigateItem
 import com.woongi.navigator.api.Destination
 import com.woongi.navigator.api.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +42,13 @@ class DetailViewModel
         }
     }
 
-    fun navigateHome() {
-        navigator.createIntent(Destination.Main)
+    fun navigateHome(
+        item: Path? = null
+    ) {
+        navigator.createIntent(Destination.Main(
+            NavigateItem(
+                item = item
+            )
+        ))
     }
 }

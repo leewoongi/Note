@@ -15,8 +15,10 @@ class NavigatorImpl
 ): Navigator{
     override fun createIntent(destination: Destination) {
         val intent = when(destination) {
-            Destination.Main -> Intent(context, MainActivity::class.java)
-            Destination.Detail -> Intent(context, DetailActivity::class.java)
+            is Destination.Main -> Intent(context, MainActivity::class.java).apply {
+                putExtra("data", destination.item)
+            }
+            is Destination.Detail -> Intent(context, DetailActivity::class.java)
         }
 
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
