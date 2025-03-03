@@ -10,7 +10,9 @@ import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
+import com.woongi.home.model.uiModel.LineUiModel
 import com.woongi.home.model.uiModel.PathUiModel
+import com.woongi.home.model.uiModel.PointUiModel
 import com.woongi.home.model.uiModel.UndoRedoPath
 import com.woongi.navigator.NavigateItem
 import com.woongi.navigator.api.Destination
@@ -35,8 +37,8 @@ class MainViewModel
     private val _drawingType = MutableStateFlow(DrawingType.DRAWING)
     val drawingType = _drawingType.asStateFlow()
 
-    private val _paths = MutableStateFlow<List<PathUiModel>>(emptyList())
-    val paths: StateFlow<List<PathUiModel>> get() = _paths.asStateFlow()
+    private val _paths = MutableStateFlow(PathUiModel.default())
+    val paths: StateFlow<PathUiModel> get() = _paths.asStateFlow()
 
     private val _undo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
     val undo: StateFlow<List<UndoRedoPath>> get() = _undo.asStateFlow()
@@ -44,8 +46,8 @@ class MainViewModel
     private val _redo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
     val redo: StateFlow<List<UndoRedoPath>> get() = _redo.asStateFlow()
 
-    private val _points: MutableList<Point> = mutableListOf()
-    private val _lines: MutableList<Line> = mutableListOf()
+    private val _points: MutableList<PointUiModel> = mutableListOf()
+    private val _lines: MutableList<LineUiModel> = mutableListOf()
 
     private val _thickness = MutableStateFlow(1f)
     val thickness: StateFlow<Float> get() = _thickness.asStateFlow()
@@ -73,20 +75,12 @@ class MainViewModel
     }
 
     // 캔버스에 그리는 용도
-    fun addLine() {
-        val id = _paths.value.size
-        val newPath = PathUiModel(
-            id = id,
-            line = _points.toList(), // 선은 점의 모임
-            color = Color(color.value),
-            thickness = _thickness.value,
-            opacity = 1f
+    fun addPath() {
+        _paths.value = _paths.value.copy(
+            lines = _lines
         )
-
-        _paths.value += newPath
-        _undo.value += UndoRedoPath.Draw(newPath)
-        _redo.value = emptyList()
     }
+
 
     // 점 데이터 기록
     fun recordPoint(
@@ -95,7 +89,7 @@ class MainViewModel
         currentY: Float
     ) {
         _points.add(
-            Point(
+            PointUiModel(
                 type = type,
                 pointX = currentX,
                 pointY = currentY
@@ -105,15 +99,20 @@ class MainViewModel
 
     // 선 데이터 기록
     fun recordLine() {
-        _lines.add(
-            Line(
-                thickness = thickness.value,
-                opacity = opacity.value,
-                points = _points.map { it.copy() },
-                color = color.value
-            )
+        val id = _lines.size
+        val newLine =  LineUiModel(
+            id = id,
+            points = _points.toList(), // 선은 점의 모임
+            color = Color(color.value),
+            thickness = _thickness.value,
+            opacity = opacity.value
         )
+
+        _lines.add(newLine)
+
         _points.clear()
+        _undo.value += UndoRedoPath.Draw(newLine)
+        _redo.value = emptyList()
     }
 
 
@@ -144,10 +143,14 @@ class MainViewModel
 
         when(lastLine){
             is UndoRedoPath.Draw -> {
-                _paths.value = _paths.value.filterNot { it.id == lastLine.path.id }
+                _paths.value = _paths.value.copy(
+                    lines = _paths.value.lines.filterNot { line -> line.id == lastLine.line.id }
+                )
             }
             is UndoRedoPath.Erase -> {
-                _paths.value = (_paths.value + lastLine.paths).sortedBy { it.id }
+                _paths.value = _paths.value.copy(
+                    lines = (_paths.value.lines + lastLine.lines).sortedBy { it.id }
+                )
             }
         }
     }
@@ -160,11 +163,15 @@ class MainViewModel
 
         when(lastLine){
             is UndoRedoPath.Draw -> {
-                _paths.value += lastLine.path
+                _paths.value = _paths.value.copy(
+                    lines = _paths.value.lines + lastLine.line
+                )
             }
             is UndoRedoPath.Erase -> {
-                lastLine.paths.forEach { line ->
-                    _paths.value = _paths.value.filter { it.id != line.id }
+                lastLine.lines.forEach { line ->
+                    _paths.value = _paths.value.copy(
+                        lines = _paths.value.lines.filter { it.id != line.id }
+                    )
                 }
             }
         }
@@ -179,8 +186,8 @@ class MainViewModel
         val threshold = 30f // 지우개 지름 나중에 사이즈 조절 가능하게 해야함
 
         // 지워야 할 경로를 찾기
-        val erased = _paths.value.filter { path ->
-            path.line.any { point ->
+        val erased = _paths.value.lines.filter { path ->
+            path.points.any { point ->
                 distanceBetween(currentX, currentY, point.pointX, point.pointY) < threshold
             }
         }
@@ -188,7 +195,9 @@ class MainViewModel
         if (erased.isNotEmpty()) {
             _undo.value += UndoRedoPath.Erase(erased)
             _redo.value = emptyList()
-            _paths.value = _paths.value.filter { path -> path !in erased }
+            _paths.value = _paths.value.copy(
+                lines = _paths.value.lines.filter { line -> line !in erased }
+            )
         }
     }
 
@@ -215,8 +224,21 @@ class MainViewModel
             try {
                 saveUseCase.save(
                     Path(
-                        title = "TEST TEST TEST",
-                        path = _lines
+                        title = _paths.value.title,
+                        path = _paths.value.lines.map { line ->
+                            Line(
+                                thickness = line.thickness,
+                                opacity = line.opacity,
+                                color = line.color.toArgb(),
+                                points = line.points.map { point ->
+                                    Point(
+                                        type = point.type,
+                                        pointX = point.pointX,
+                                        pointY = point.pointY
+                                    )
+                                }
+                            )
+                        }
                     )
                 )
                 _snackBar.emit("저장에 성공 했습니다.")

@@ -53,8 +53,8 @@ fun Note(
                     },
                     onDragEnd = {
                         if(type == DrawingType.DRAWING) {
-                            viewModel.addLine()
                             viewModel.recordLine()
+                            viewModel.addPath()
                             currentPath = Path()
                         } else {
                             erasePath = null
@@ -83,9 +83,9 @@ fun Note(
             }
     ){
         // 기존에 그린 선
-        path.forEach { path ->
+        path.lines.forEach { path ->
             val line = Path()
-            path.line.forEach { point ->
+            path.points.forEach { point ->
                 when(point.type){
                     PathType.MOVE_TO -> { line.moveTo(point.pointX, point.pointY) }
                     PathType.LINE_TO -> { line.lineTo(point.pointX, point.pointY) }
