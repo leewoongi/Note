@@ -54,7 +54,7 @@ fun Note(
                     onDragEnd = {
                         if(type == DrawingType.DRAWING) {
                             viewModel.recordLine()
-                            viewModel.addPath()
+                            viewModel.drawPath()
                             currentPath = Path()
                         } else {
                             erasePath = null

@@ -75,10 +75,8 @@ class MainViewModel
     }
 
     // 캔버스에 그리는 용도
-    fun addPath() {
-        _paths.value = _paths.value.copy(
-            lines = _lines
-        )
+    fun drawPath() {
+        _paths.value = _paths.value.copy(lines = _lines)
     }
 
 
@@ -141,18 +139,12 @@ class MainViewModel
         _undo.value = _undo.value.dropLast(1)
         _redo.value += lastLine
 
-        when(lastLine){
-            is UndoRedoPath.Draw -> {
-                _paths.value = _paths.value.copy(
-                    lines = _paths.value.lines.filterNot { line -> line.id == lastLine.line.id }
-                )
-            }
-            is UndoRedoPath.Erase -> {
-                _paths.value = _paths.value.copy(
-                    lines = (_paths.value.lines + lastLine.lines).sortedBy { it.id }
-                )
-            }
+        when(lastLine) {
+            is UndoRedoPath.Draw -> { _lines.removeIf { it.id == lastLine.line.id } }
+            is UndoRedoPath.Erase -> { _lines += lastLine.lines.sortedBy { line-> line.id } }
         }
+
+        drawPath()
     }
 
     // 복구
@@ -161,20 +153,12 @@ class MainViewModel
         _redo.value = _redo.value.dropLast(1)
         _undo.value += lastLine
 
-        when(lastLine){
-            is UndoRedoPath.Draw -> {
-                _paths.value = _paths.value.copy(
-                    lines = _paths.value.lines + lastLine.line
-                )
-            }
-            is UndoRedoPath.Erase -> {
-                lastLine.lines.forEach { line ->
-                    _paths.value = _paths.value.copy(
-                        lines = _paths.value.lines.filter { it.id != line.id }
-                    )
-                }
-            }
+        when(lastLine) {
+            is UndoRedoPath.Draw -> { _lines += lastLine.line }
+            is UndoRedoPath.Erase -> { _lines.removeIf { line -> lastLine.lines.any { it.id == line.id } } }
         }
+
+        drawPath()
     }
 
     // 선 지우기
@@ -186,8 +170,8 @@ class MainViewModel
         val threshold = 30f // 지우개 지름 나중에 사이즈 조절 가능하게 해야함
 
         // 지워야 할 경로를 찾기
-        val erased = _paths.value.lines.filter { path ->
-            path.points.any { point ->
+        val erased = _lines.filter { line ->
+            line.points.any { point ->
                 distanceBetween(currentX, currentY, point.pointX, point.pointY) < threshold
             }
         }
@@ -195,9 +179,9 @@ class MainViewModel
         if (erased.isNotEmpty()) {
             _undo.value += UndoRedoPath.Erase(erased)
             _redo.value = emptyList()
-            _paths.value = _paths.value.copy(
-                lines = _paths.value.lines.filter { line -> line !in erased }
-            )
+
+            _lines.removeAll { line -> line in erased }
+            drawPath()
         }
     }
 
