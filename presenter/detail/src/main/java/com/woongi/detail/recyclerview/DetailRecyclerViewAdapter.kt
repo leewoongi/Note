@@ -10,7 +10,7 @@ import com.woongi.domain.point.entity.Line
 import com.woongi.domain.point.entity.Path
 
 class DetailRecyclerViewAdapter(
-    private val onClick: () -> Unit
+    private val onClick: (Path) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>()  {
     private val items = mutableListOf<Path>()
 
@@ -34,7 +34,7 @@ class DetailRecyclerViewAdapter(
         if(holder is DetailViewHolder){
             holder.bind(
                 path = items[position],
-                onClick = { onClick() }
+                onClick = { onClick(items[position]) }
             )
         }
     }

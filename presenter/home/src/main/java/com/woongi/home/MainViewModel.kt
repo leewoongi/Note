@@ -1,6 +1,5 @@
 package com.woongi.home
 
-import android.location.Location.distanceBetween
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
@@ -11,8 +10,14 @@ import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
+import com.woongi.home.model.mapper.toLineUiModel
+import com.woongi.home.model.mapper.toListLineUiModel
+import com.woongi.home.model.mapper.toPathUiModel
+import com.woongi.home.model.uiModel.LineUiModel
 import com.woongi.home.model.uiModel.PathUiModel
+import com.woongi.home.model.uiModel.PointUiModel
 import com.woongi.home.model.uiModel.UndoRedoPath
+import com.woongi.navigator.NavigateItem
 import com.woongi.navigator.api.Destination
 import com.woongi.navigator.api.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,8 +40,8 @@ class MainViewModel
     private val _drawingType = MutableStateFlow(DrawingType.DRAWING)
     val drawingType = _drawingType.asStateFlow()
 
-    private val _paths = MutableStateFlow<List<PathUiModel>>(emptyList())
-    val paths: StateFlow<List<PathUiModel>> get() = _paths.asStateFlow()
+    private val _paths = MutableStateFlow(PathUiModel.default())
+    val paths: StateFlow<PathUiModel> get() = _paths.asStateFlow()
 
     private val _undo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
     val undo: StateFlow<List<UndoRedoPath>> get() = _undo.asStateFlow()
@@ -44,8 +49,8 @@ class MainViewModel
     private val _redo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
     val redo: StateFlow<List<UndoRedoPath>> get() = _redo.asStateFlow()
 
-    private val _points: MutableList<Point> = mutableListOf()
-    private val _lines: MutableList<Line> = mutableListOf()
+    private val _points: MutableList<PointUiModel> = mutableListOf()
+    private val _lines: MutableList<LineUiModel> = mutableListOf()
 
     private val _thickness = MutableStateFlow(1f)
     val thickness: StateFlow<Float> get() = _thickness.asStateFlow()
@@ -59,6 +64,29 @@ class MainViewModel
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
 
+    fun setNavigateItem(navigateItem: NavigateItem) {
+        val item = navigateItem.item ?: return
+
+        if(item is Path) {
+            _paths.value = item.toPathUiModel()
+            loadInitializeSaveData(item)
+        }
+    }
+
+    // 저장된 데이터 불러 온 후 수정 하기 전에 초기화 작업
+    private fun loadInitializeSaveData(item: Path) {
+        _lines.addAll(item.path.toListLineUiModel() )
+        item.path.forEach { line ->
+            line.points.forEach { point ->
+                recordPoint(
+                    type = point.type,
+                    currentX = point.pointX,
+                    currentY = point.pointY
+                )
+            }
+        }
+    }
+
     fun updateThickness(thickness: Float) {
         _thickness.value = thickness
     }
@@ -68,20 +96,10 @@ class MainViewModel
     }
 
     // 캔버스에 그리는 용도
-    fun addPath() {
-        val id = _paths.value.size
-        val newPath = PathUiModel(
-            id = id,
-            line = _points.toList(), // 선은 점의 모임
-            color = Color(color.value),
-            thickness = _thickness.value,
-            opacity = 1f
-        )
-
-        _paths.value += newPath
-        _undo.value += UndoRedoPath.Draw(newPath)
-        _redo.value = emptyList()
+    fun drawPath() {
+        _paths.value = _paths.value.copy(lines = _lines)
     }
+
 
     // 점 데이터 기록
     fun recordPoint(
@@ -90,7 +108,7 @@ class MainViewModel
         currentY: Float
     ) {
         _points.add(
-            Point(
+            PointUiModel(
                 type = type,
                 pointX = currentX,
                 pointY = currentY
@@ -100,15 +118,20 @@ class MainViewModel
 
     // 선 데이터 기록
     fun recordLine() {
-        _lines.add(
-            Line(
-                thickness = thickness.value,
-                opacity = opacity.value,
-                points = _points.map { it.copy() },
-                color = color.value
-            )
+        val id = _lines.size
+        val newLine =  LineUiModel(
+            id = id,
+            points = _points.toList(), // 선은 점의 모임
+            color = Color(_color.value),
+            thickness = _thickness.value,
+            opacity = opacity.value
         )
+
+        _lines.add(newLine)
+
         _points.clear()
+        _undo.value += UndoRedoPath.Draw(newLine)
+        _redo.value = emptyList()
     }
 
 
@@ -137,14 +160,12 @@ class MainViewModel
         _undo.value = _undo.value.dropLast(1)
         _redo.value += lastLine
 
-        when(lastLine){
-            is UndoRedoPath.Draw -> {
-                _paths.value = _paths.value.filterNot { it.id == lastLine.path.id }
-            }
-            is UndoRedoPath.Erase -> {
-                _paths.value = (_paths.value + lastLine.paths).sortedBy { it.id }
-            }
+        when(lastLine) {
+            is UndoRedoPath.Draw -> { _lines.removeIf { it.id == lastLine.line.id } }
+            is UndoRedoPath.Erase -> { _lines += lastLine.lines.sortedBy { line-> line.id } }
         }
+
+        drawPath()
     }
 
     // 복구
@@ -153,16 +174,12 @@ class MainViewModel
         _redo.value = _redo.value.dropLast(1)
         _undo.value += lastLine
 
-        when(lastLine){
-            is UndoRedoPath.Draw -> {
-                _paths.value += lastLine.path
-            }
-            is UndoRedoPath.Erase -> {
-                lastLine.paths.forEach { line ->
-                    _paths.value = _paths.value.filter { it.id != line.id }
-                }
-            }
+        when(lastLine) {
+            is UndoRedoPath.Draw -> { _lines += lastLine.line }
+            is UndoRedoPath.Erase -> { _lines.removeIf { line -> lastLine.lines.any { it.id == line.id } } }
         }
+
+        drawPath()
     }
 
     // 선 지우기
@@ -174,8 +191,8 @@ class MainViewModel
         val threshold = 30f // 지우개 지름 나중에 사이즈 조절 가능하게 해야함
 
         // 지워야 할 경로를 찾기
-        val erased = _paths.value.filter { path ->
-            path.line.any { point ->
+        val erased = _lines.filter { line ->
+            line.points.any { point ->
                 distanceBetween(currentX, currentY, point.pointX, point.pointY) < threshold
             }
         }
@@ -183,7 +200,9 @@ class MainViewModel
         if (erased.isNotEmpty()) {
             _undo.value += UndoRedoPath.Erase(erased)
             _redo.value = emptyList()
-            _paths.value = _paths.value.filter { path -> path !in erased }
+
+            _lines.removeAll { line -> line in erased }
+            drawPath()
         }
     }
 
@@ -210,8 +229,22 @@ class MainViewModel
             try {
                 saveUseCase.save(
                     Path(
-                        title = "TEST TEST TEST",
-                        path = _lines
+                        title = _paths.value.title,
+                        path = _paths.value.lines.map { line ->
+                            Line(
+                                id = line.id,
+                                thickness = line.thickness,
+                                opacity = line.opacity,
+                                color = line.color.toArgb(),
+                                points = line.points.map { point ->
+                                    Point(
+                                        type = point.type,
+                                        pointX = point.pointX,
+                                        pointY = point.pointY
+                                    )
+                                }
+                            )
+                        }
                     )
                 )
                 _snackBar.emit("저장에 성공 했습니다.")
@@ -222,6 +255,8 @@ class MainViewModel
     }
 
     fun navigateDetail() {
-        navigator.createIntent(Destination.Detail)
+        navigator.createIntent(Destination.Detail(
+            NavigateItem(item = null)
+        ))
     }
 }

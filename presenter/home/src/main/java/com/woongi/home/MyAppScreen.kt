@@ -29,12 +29,13 @@ import com.woongi.home.ui.Note
 import com.woongi.home.ui.Toolbar
 import com.woongi.home.ui.component.LinePropertiesDialog
 import com.woongi.home.ui.component.PlatteDialog
+import com.woongi.navigator.NavigateItem
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 @Composable
 fun MyAppScreen(
-
+    navigateItem: NavigateItem?
 ) {
     val context = LocalContext.current
     val viewModel: MainViewModel = hiltViewModel()
@@ -54,6 +55,12 @@ fun MyAppScreen(
                     message = message
                 )
             }
+        }
+    }
+
+    LaunchedEffect(navigateItem) {
+        navigateItem?.let {
+            viewModel.setNavigateItem(it)
         }
     }
 
