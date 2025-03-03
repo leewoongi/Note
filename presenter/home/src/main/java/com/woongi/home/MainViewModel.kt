@@ -10,6 +10,9 @@ import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
+import com.woongi.home.model.mapper.toLineUiModel
+import com.woongi.home.model.mapper.toListLineUiModel
+import com.woongi.home.model.mapper.toPathUiModel
 import com.woongi.home.model.uiModel.LineUiModel
 import com.woongi.home.model.uiModel.PathUiModel
 import com.woongi.home.model.uiModel.PointUiModel
@@ -63,7 +66,25 @@ class MainViewModel
 
     fun setNavigateItem(navigateItem: NavigateItem) {
         val item = navigateItem.item ?: return
-        println("TEST TEST TET setNavigateItem: $item")
+
+        if(item is Path) {
+            _paths.value = item.toPathUiModel()
+            loadInitializeSaveData(item)
+        }
+    }
+
+    // 저장된 데이터 불러 온 후 수정 하기 전에 초기화 작업
+    private fun loadInitializeSaveData(item: Path) {
+        _lines.addAll(item.path.toListLineUiModel() )
+        item.path.forEach { line ->
+            line.points.forEach { point ->
+                recordPoint(
+                    type = point.type,
+                    currentX = point.pointX,
+                    currentY = point.pointY
+                )
+            }
+        }
     }
 
     fun updateThickness(thickness: Float) {
@@ -101,7 +122,7 @@ class MainViewModel
         val newLine =  LineUiModel(
             id = id,
             points = _points.toList(), // 선은 점의 모임
-            color = Color(color.value),
+            color = Color(_color.value),
             thickness = _thickness.value,
             opacity = opacity.value
         )
@@ -211,6 +232,7 @@ class MainViewModel
                         title = _paths.value.title,
                         path = _paths.value.lines.map { line ->
                             Line(
+                                id = line.id,
                                 thickness = line.thickness,
                                 opacity = line.opacity,
                                 color = line.color.toArgb(),
