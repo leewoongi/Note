@@ -3,6 +3,7 @@ package com.woongi.detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Path
+import com.woongi.domain.point.usecase.DeleteUseCase
 import com.woongi.domain.point.usecase.GetUseCase
 import com.woongi.navigator.NavigateItem
 import com.woongi.navigator.api.Destination
@@ -19,6 +20,7 @@ import javax.inject.Inject
 class DetailViewModel
 @Inject constructor(
     private val getUseCase: GetUseCase,
+    private val deleteUseCase: DeleteUseCase,
     private val navigator: Navigator
 ) : ViewModel() {
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
@@ -32,13 +34,19 @@ class DetailViewModel
             try {
                 _lines.value = getUseCase.getAll()
                 if (_lines.value.isEmpty()) {
-                    _snackBar.emit("불러 올 데이터가 없습니다.")
+                    showSnackBar("불러 올 데이터가 없습니다.")
                 } else {
-                    _snackBar.emit("불러오기에 성공 했습니다.")
+                    showSnackBar("불러오기에 성공 했습니다.")
                 }
             } catch (e: Exception) {
-                _snackBar.emit("불러오기에 실패 했습니다.")
+                showSnackBar("불러오기에 실패 했습니다.")
             }
+        }
+    }
+
+    fun delete(path: Path) {
+        viewModelScope.launch {
+            deleteUseCase.invoke(path)
         }
     }
 
@@ -50,5 +58,11 @@ class DetailViewModel
                 item = item
             )
         ))
+    }
+
+    fun showSnackBar(message: String) {
+        viewModelScope.launch {
+            _snackBar.emit(message)
+        }
     }
 }

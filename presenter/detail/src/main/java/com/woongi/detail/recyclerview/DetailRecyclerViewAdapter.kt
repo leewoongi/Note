@@ -10,7 +10,8 @@ import com.woongi.domain.point.entity.Line
 import com.woongi.domain.point.entity.Path
 
 class DetailRecyclerViewAdapter(
-    private val onClick: (Path) -> Unit
+    private val onClick: (Path) -> Unit,
+    private val onRemove: (Path) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>()  {
     private val items = mutableListOf<Path>()
 
@@ -49,6 +50,8 @@ class DetailRecyclerViewAdapter(
     }
 
     fun remove(position: Int) {
+        val removedItem = items[position]
+
         val newItems = items.toMutableList()
         newItems.removeAt(position)
 
@@ -58,5 +61,6 @@ class DetailRecyclerViewAdapter(
         items.clear()
         items.addAll(newItems)
         diffResult.dispatchUpdatesTo(this)
+        onRemove(removedItem)
     }
 }
