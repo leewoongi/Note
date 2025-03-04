@@ -5,7 +5,9 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.woongi.data.local.room.entity.LineEntity
+import com.woongi.data.local.room.entity.PathEntity
 import com.woongi.data.local.room.entity.relation.LineWithPoints
 import com.woongi.data.local.room.entity.relation.PathWithLines
 
@@ -16,6 +18,10 @@ interface LineDao {
 
     @Query("SELECT * FROM lines WHERE pathId = :pathId")
     suspend fun getLinesByPathId(pathId: Int): List<LineEntity>
+
+    @Update
+    suspend fun updateLine(line: LineEntity)
+
 
     @Transaction
     @Query("SELECT * FROM lines")
