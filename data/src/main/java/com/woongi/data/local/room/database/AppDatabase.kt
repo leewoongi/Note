@@ -17,7 +17,7 @@ import com.woongi.data.local.room.entity.PointEntity
         LineEntity::class,
         PointEntity::class
     ],
-    version = 2
+    version = 3
 )
 
 abstract class AppDatabase : RoomDatabase() {

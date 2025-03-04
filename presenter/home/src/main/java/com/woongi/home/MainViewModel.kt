@@ -223,6 +223,7 @@ class MainViewModel
             try {
                 saveUseCase.save(
                     Path(
+                        id = _paths.value.id ,
                         title = _paths.value.title,
                         path = _paths.value.lines.map { line ->
                             Line(
@@ -243,6 +244,7 @@ class MainViewModel
                 )
                 _snackBar.emit("저장에 성공 했습니다.")
             } catch (e: Exception) {
+                println("TEST TEST TEST e: $e")
                 _snackBar.emit("저장에 실패 했습니다.")
             }
         }

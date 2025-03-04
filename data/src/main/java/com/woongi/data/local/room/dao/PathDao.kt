@@ -4,8 +4,10 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.woongi.data.local.room.entity.PathEntity
 import com.woongi.data.local.room.entity.relation.PathWithLines
+import com.woongi.domain.point.entity.Path
 
 @Dao
 interface PathDao {
@@ -17,6 +19,9 @@ interface PathDao {
 
     @Query("SELECT * FROM paths WHERE id = :pathId")
     suspend fun getPathById(pathId: Long): PathEntity
+
+    @Update
+    suspend fun updatePath(path: PathEntity)
 
     @Transaction
     @Query("SELECT * FROM paths")
