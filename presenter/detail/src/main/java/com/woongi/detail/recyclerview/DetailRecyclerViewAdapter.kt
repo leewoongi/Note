@@ -49,6 +49,14 @@ class DetailRecyclerViewAdapter(
     }
 
     fun remove(position: Int) {
+        val newItems = items.toMutableList()
+        newItems.removeAt(position)
 
+        val diffCallback = DetailDiffUtil(items, newItems)
+        val diffResult = DiffUtil.calculateDiff(diffCallback)
+
+        items.clear()
+        items.addAll(newItems)
+        diffResult.dispatchUpdatesTo(this)
     }
 }

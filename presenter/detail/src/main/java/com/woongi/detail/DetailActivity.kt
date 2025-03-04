@@ -11,7 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.woongi.detail.recyclerview.DetailRecyclerViewAdapter
-import com.woongi.navigator.NavigateItem
+import com.woongi.detail.recyclerview.event.createSwipeCallback
+import com.woongi.detail.recyclerview.event.itemTouchHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -57,13 +58,18 @@ class DetailActivity : AppCompatActivity() {
 
 
         recyclerView = findViewById(R.id.rv_detail)
-        recyclerViewAdapter = DetailRecyclerViewAdapter { path ->
-            viewModel.navigateHome(item = path)
-        }
+        recyclerViewAdapter = DetailRecyclerViewAdapter(
+            onClick = { path -> viewModel.navigateHome(item = path)}
+        )
 
         recyclerView.apply {
             adapter = recyclerViewAdapter
             layoutManager = LinearLayoutManager(context)
+            createSwipeCallback(
+                onSwipe = { position ->
+                    recyclerViewAdapter.remove(position = position)
+                }
+            ).attachToRecyclerView(this)
         }
     }
 }
