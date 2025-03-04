@@ -275,6 +275,33 @@ class MainViewModel
         }
     }
 
+    fun coverPath() {
+        viewModelScope.launch {
+            saveUseCase.save(
+                Path(
+                    id = _paths.value.id,
+                    title = _paths.value.title,
+                    path = _paths.value.lines.map { line ->
+                        Line(
+                            id = line.id,
+                            thickness = line.thickness,
+                            opacity = line.opacity,
+                            color = line.color.toArgb(),
+                            points = line.points.map { point ->
+                                Point(
+                                    type = point.type,
+                                    pointX = point.pointX,
+                                    pointY = point.pointY
+                                )
+                            }
+                        )
+                    }
+                )
+            )
+            _snackBar.emit("저장에 성공 했습니다.")
+        }
+    }
+
     fun closeDialog() {
         viewModelScope.launch {
             _saveDialog.emit(false)

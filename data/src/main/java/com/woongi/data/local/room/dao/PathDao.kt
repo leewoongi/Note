@@ -2,6 +2,7 @@ package com.woongi.data.local.room.dao
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
@@ -11,7 +12,7 @@ import com.woongi.domain.point.entity.Path
 
 @Dao
 interface PathDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(path: PathEntity) : Long
 
     @Query("SELECT * FROM paths")
@@ -19,9 +20,6 @@ interface PathDao {
 
     @Query("SELECT * FROM paths WHERE id = :pathId")
     suspend fun getPathById(pathId: Long): PathEntity
-
-    @Update
-    suspend fun updatePath(path: PathEntity)
 
     @Transaction
     @Query("SELECT * FROM paths")

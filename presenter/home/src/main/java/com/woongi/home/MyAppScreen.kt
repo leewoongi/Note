@@ -131,7 +131,7 @@ fun MyAppScreen(
                 SaveDialog(
                     onDismiss = { viewModel.closeDialog() },
                     onPositiveClick = { viewModel.savePath() }, // 새로 저장
-                    onNegativeClick = {  } // 덮어쓰기
+                    onNegativeClick = { viewModel.coverPath()  } // 덮어쓰기
                 )
             }
         }
