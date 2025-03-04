@@ -42,5 +42,9 @@ class PathRepositoryImpl
             }
         }
     }
+
+    override suspend fun delete(path: Path) {
+        pathDao.delete(path.toPathEntity())
+    }
 }
 

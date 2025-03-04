@@ -67,7 +67,7 @@ internal class DetailViewHolder(
         }
 
         canvasView.setPath(properties)
-        textView.text = "TEST TEST TEST"
+        textView.text = path.title
         view.rootView.setOnClickListener {
             onClick()
         }

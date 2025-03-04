@@ -48,7 +48,7 @@ fun MyAppScreen(
 
     val thickness by viewModel.thickness.collectAsState()
     val opacity by viewModel.opacity.collectAsState()
-    val isVisibleSaveDialog by viewModel.saveDialog.collectAsState(false)
+    val saveDialog by viewModel.saveDialog.collectAsState(null)
 
     LaunchedEffect(Unit) {
         viewModel.snackBar.collectLatest { message ->
@@ -127,11 +127,19 @@ fun MyAppScreen(
                 )
             }
 
-            if(isVisibleSaveDialog) {
+            saveDialog?.let { uiModel ->
                 SaveDialog(
+                    uiModel = uiModel,
                     onDismiss = { viewModel.closeDialog() },
-                    onPositiveClick = { viewModel.savePath() }, // 새로 저장
-                    onNegativeClick = { viewModel.coverPath()  } // 덮어쓰기
+                    onPositiveClick = { title -> viewModel.savePath(title) }, // 새로 저장
+                    onNegativeClick = { title -> viewModel.coverPath(title)  }, // 덮어쓰기
+                    showSnackBar = {
+                        coroutineScope.launch {
+                            snackBarHostState.showSnackbar(
+                                message = "제목을 입력하세요."
+                            )
+                        }
+                    }
                 )
             }
         }

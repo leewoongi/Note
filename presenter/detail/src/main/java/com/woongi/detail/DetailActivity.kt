@@ -1,6 +1,7 @@
 package com.woongi.detail
 
 import android.os.Bundle
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -10,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.woongi.detail.recyclerview.DetailRecyclerViewAdapter
-import com.woongi.navigator.NavigateItem
+import com.woongi.detail.recyclerview.event.createSwipeCallback
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -23,6 +24,7 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var faButton: FloatingActionButton
     private lateinit var recyclerView: RecyclerView
     private lateinit var recyclerViewAdapter: DetailRecyclerViewAdapter
+    private lateinit var subTitleTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,13 +36,15 @@ class DetailActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             viewModel.lines.collectLatest {
+                subTitleTextView.text = this@DetailActivity.getString(R.string.note_count, it.size)
                 recyclerViewAdapter.set(it)
             }
         }
 
         lifecycleScope.launch {
             viewModel.snackBar.collectLatest { message ->
-                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT).show()
+                Snackbar.make(findViewById(android.R.id.content), message, Snackbar.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -49,16 +53,24 @@ class DetailActivity : AppCompatActivity() {
         toolbar = findViewById(R.id.toolbar)
         faButton = findViewById(R.id.fab_add)
         faButton.setOnClickListener { viewModel.navigateHome() }
+        subTitleTextView = findViewById(R.id.tv_sub_title)
 
 
         recyclerView = findViewById(R.id.rv_detail)
-        recyclerViewAdapter = DetailRecyclerViewAdapter { path->
-           viewModel.navigateHome(item = path)
-        }
+        recyclerViewAdapter = DetailRecyclerViewAdapter(
+            onClick = { path -> viewModel.navigateHome(item = path)},
+            onRemove = { path ->
+                viewModel.delete(path)
+                viewModel.showSnackBar("삭제 되었습니다.")
+            }
+        )
 
         recyclerView.apply {
             adapter = recyclerViewAdapter
             layoutManager = LinearLayoutManager(context)
+            createSwipeCallback(
+                onSwipe = { position -> recyclerViewAdapter.remove(position = position) }
+            ).attachToRecyclerView(this)
         }
     }
 }

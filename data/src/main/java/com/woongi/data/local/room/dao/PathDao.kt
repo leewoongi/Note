@@ -1,6 +1,7 @@
 package com.woongi.data.local.room.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -24,4 +25,7 @@ interface PathDao {
     @Transaction
     @Query("SELECT * FROM paths")
     fun getPathsWithLines(): List<PathWithLines>
+
+    @Delete
+    suspend fun delete(path: PathEntity)
 }

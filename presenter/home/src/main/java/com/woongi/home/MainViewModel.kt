@@ -4,18 +4,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.woongi.domain.point.entity.Line
 import com.woongi.domain.point.entity.Path
-import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
+import com.woongi.home.model.constants.DialogType
 import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.mapper.toLine
-import com.woongi.home.model.mapper.toListLineUiModel
 import com.woongi.home.model.mapper.toPathUiModel
 import com.woongi.home.model.uiModel.LineUiModel
 import com.woongi.home.model.uiModel.PathUiModel
 import com.woongi.home.model.uiModel.PointUiModel
+import com.woongi.home.model.uiModel.SaveDialogUiModel
 import com.woongi.home.model.uiModel.UndoRedoPath
 import com.woongi.navigator.NavigateItem
 import com.woongi.navigator.api.Destination
@@ -43,6 +42,9 @@ class MainViewModel
     private val _paths = MutableStateFlow(PathUiModel.default())
     val paths: StateFlow<PathUiModel> get() = _paths.asStateFlow()
 
+    private val _pathsTitle = MutableStateFlow("")
+    val pathsTitle: StateFlow<String> get() = _pathsTitle.asStateFlow()
+
     private val _undo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
     val undo: StateFlow<List<UndoRedoPath>> get() = _undo.asStateFlow()
 
@@ -64,7 +66,7 @@ class MainViewModel
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
 
-    private val _saveDialog = MutableSharedFlow<Boolean>(replay = 1)
+    private val _saveDialog = MutableSharedFlow<SaveDialogUiModel?>(replay = 1)
     val saveDialog = _saveDialog.asSharedFlow()
 
     fun setNavigateItem(navigateItem: NavigateItem) {
@@ -74,6 +76,7 @@ class MainViewModel
             val path = item.toPathUiModel()
             loadInitializeSaveData(path)
             _paths.value = path
+            _pathsTitle.value = path.title
         }
     }
 
@@ -226,7 +229,6 @@ class MainViewModel
         ).toFloat()
     }
 
-
     fun save() {
         viewModelScope.launch {
             if (_lines.isEmpty()) {
@@ -234,40 +236,44 @@ class MainViewModel
                 return@launch
             }
 
+            val pathId = _paths.value.id
+            _saveDialog.emit(
+                SaveDialogUiModel(
+                    type = if (pathId == null) DialogType.CREATE else DialogType.MODIFY,
+                    dialogTitle = "저장",
+                    subTitle = "제목을 입력하세요",
+                    pathTitle = if(pathId == null) "" else _paths.value.title,
+                    positiveName = "새로저장",
+                    isVisibleNegativeButton = pathId != null,
+                    negativeName = if (pathId == null) "" else "덮어쓰기"
+                )
+            )
+        }
+    }
+
+    fun savePath(title: String) = saveOrUpdatePath(null, title) // 저장
+    fun coverPath(title: String) = saveOrUpdatePath(_paths.value.id, title) // 수정 (덮어쓰기)
+
+    private fun saveOrUpdatePath(id: Int?, title: String) {
+        viewModelScope.launch {
             try {
-                val pathId = _paths.value.id
-                if (pathId != null) {
-                    // 수정 시 다이얼로그 보여주기
-                    _saveDialog.emit(true)
-                } else {
-                    // 처음 그릴 때
-                    savePath()
-                }
+                saveUseCase.save(
+                    Path(
+                        id = id,
+                        title = title,
+                        path = _lines.map { line -> line.toLine() }
+                    )
+                )
+                _snackBar.emit("저장에 성공 했습니다.")
             } catch (e: Exception) {
                 _snackBar.emit("저장에 실패 했습니다.")
             }
         }
     }
 
-    fun savePath() = saveOrUpdatePath(null) // 저장
-    fun coverPath() = saveOrUpdatePath(_paths.value.id) // 수정 (덮어쓰기)
-
-    private fun saveOrUpdatePath(id: Int?) {
-        viewModelScope.launch {
-            saveUseCase.save(
-                Path(
-                    id = id,
-                    title = _paths.value.title,
-                    path = _lines.map { line -> line.toLine() }
-                )
-            )
-            _snackBar.emit("저장에 성공 했습니다.")
-        }
-    }
-
     fun closeDialog() {
         viewModelScope.launch {
-            _saveDialog.emit(false)
+            _saveDialog.emit(null)
         }
     }
 
