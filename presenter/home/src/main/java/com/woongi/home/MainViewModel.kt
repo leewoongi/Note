@@ -154,6 +154,8 @@ class MainViewModel
 
     // 이전 상태로
     fun undo() {
+        if(_undo.value.isEmpty()) return
+
         val lastLine = _undo.value.last()
         _undo.value = _undo.value.dropLast(1)
         _redo.value += lastLine
@@ -173,6 +175,8 @@ class MainViewModel
 
     // 복구
     fun redo() {
+        if(redo.value.isEmpty()) return
+
         val lastLine = _redo.value.last()
         _redo.value = _redo.value.dropLast(1)
         _undo.value += lastLine

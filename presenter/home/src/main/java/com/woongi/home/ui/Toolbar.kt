@@ -58,8 +58,8 @@ fun Toolbar(
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = modifier.clickable(
-                    enabled = undo.isEmpty(),
+                modifier = Modifier.clickable(
+                    enabled = undo.isNotEmpty(),
                     onClick = { viewModel.undo() }
                 ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_undo),
@@ -70,8 +70,8 @@ fun Toolbar(
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = modifier.clickable(
-                    enabled = undo.isEmpty(),
+                modifier = Modifier.clickable(
+                    enabled = redo.isNotEmpty(),
                     onClick = { viewModel.redo() }
                 ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_redo),
