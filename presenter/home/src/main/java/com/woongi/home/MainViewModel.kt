@@ -10,6 +10,7 @@ import com.woongi.domain.point.entity.Point
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.domain.point.usecase.SaveUseCase
 import com.woongi.home.model.constants.DrawingType
+import com.woongi.home.model.mapper.toLine
 import com.woongi.home.model.mapper.toListLineUiModel
 import com.woongi.home.model.mapper.toPathUiModel
 import com.woongi.home.model.uiModel.LineUiModel
@@ -248,54 +249,16 @@ class MainViewModel
         }
     }
 
-    fun savePath() {
-        viewModelScope.launch {
-            saveUseCase.save(
-                Path(
-                    id = null,
-                    title = _paths.value.title,
-                    path = _paths.value.lines.map { line ->
-                        Line(
-                            id = line.id,
-                            thickness = line.thickness,
-                            opacity = line.opacity,
-                            color = line.color.toArgb(),
-                            points = line.points.map { point ->
-                                Point(
-                                    type = point.type,
-                                    pointX = point.pointX,
-                                    pointY = point.pointY
-                                )
-                            }
-                        )
-                    }
-                )
-            )
-            _snackBar.emit("저장에 성공 했습니다.")
-        }
-    }
+    fun savePath() = saveOrUpdatePath(null) // 저장
+    fun coverPath() = saveOrUpdatePath(_paths.value.id) // 수정 (덮어쓰기)
 
-    fun coverPath() {
+    private fun saveOrUpdatePath(id: Int?) {
         viewModelScope.launch {
             saveUseCase.save(
                 Path(
-                    id = _paths.value.id,
+                    id = id,
                     title = _paths.value.title,
-                    path = _paths.value.lines.map { line ->
-                        Line(
-                            id = line.id,
-                            thickness = line.thickness,
-                            opacity = line.opacity,
-                            color = line.color.toArgb(),
-                            points = line.points.map { point ->
-                                Point(
-                                    type = point.type,
-                                    pointX = point.pointX,
-                                    pointY = point.pointY
-                                )
-                            }
-                        )
-                    }
+                    path = _lines.map { line -> line.toLine() }
                 )
             )
             _snackBar.emit("저장에 성공 했습니다.")
