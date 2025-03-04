@@ -1,5 +1,6 @@
 package com.woongi.home.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -57,11 +58,10 @@ fun Toolbar(
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = if(undo.isEmpty()) {
-                    Modifier
-                } else {
-                    Modifier.singleClick( onSingleClick = { viewModel.undo() } )
-                },
+                modifier = modifier.clickable(
+                    enabled = undo.isEmpty(),
+                    onClick = { viewModel.undo() }
+                ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_undo),
                 contentDescription = "undo",
                 tint = if(undo.isEmpty()) Color.Gray else Color.Black,
@@ -70,11 +70,10 @@ fun Toolbar(
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = if(redo.isEmpty()) {
-                    Modifier
-                } else {
-                    Modifier.singleClick( onSingleClick = { viewModel.redo() } )
-                },
+                modifier = modifier.clickable(
+                    enabled = undo.isEmpty(),
+                    onClick = { viewModel.redo() }
+                ),
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_redo),
                 contentDescription = "redo",
                 tint = if(redo.isEmpty()) Color.Gray else Color.Black,
