@@ -29,6 +29,8 @@ fun Note(
     var erasePath by remember { mutableStateOf<Offset?>(null) }
     val type by viewModel.drawingType.collectAsState()
     val path by viewModel.paths.collectAsState()
+    val color by viewModel.color.collectAsState()
+    val thickness by viewModel.thickness.collectAsState()
 
     Canvas(
         modifier = modifier
@@ -54,7 +56,6 @@ fun Note(
                     onDragEnd = {
                         if(type == DrawingType.DRAWING) {
                             viewModel.recordLine()
-                            viewModel.drawPath()
                             currentPath = Path()
                         } else {
                             erasePath = null
@@ -83,19 +84,19 @@ fun Note(
             }
     ){
         // 기존에 그린 선
-        path.lines.forEach { path ->
-            val line = Path()
-            path.points.forEach { point ->
+        path.lines.forEach { line ->
+            val draw = Path()
+            line.points.forEach { point ->
                 when(point.type){
-                    PathType.MOVE_TO -> { line.moveTo(point.pointX, point.pointY) }
-                    PathType.LINE_TO -> { line.lineTo(point.pointX, point.pointY) }
+                    PathType.MOVE_TO -> { draw.moveTo(point.pointX, point.pointY) }
+                    PathType.LINE_TO -> { draw.lineTo(point.pointX, point.pointY) }
                 }
             }
 
             drawPath(
-                path = line,
-                color = path.color,
-                style = Stroke(path.thickness)
+                path = draw,
+                color = line.color,
+                style = Stroke(line.thickness)
             )
         }
 
@@ -103,8 +104,8 @@ fun Note(
         if(type == DrawingType.DRAWING) {
             drawPath(
                 path = currentPath,
-                color = Color(viewModel.color.value),
-                style = Stroke(width = viewModel.thickness.value) // 선 두께 설정
+                color = Color(color),
+                style = Stroke(width = thickness) // 선 두께 설정
             )
         } else {
             erasePath?.let {

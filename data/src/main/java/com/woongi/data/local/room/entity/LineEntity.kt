@@ -23,6 +23,7 @@ import androidx.room.PrimaryKey
 )
 data class LineEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val lineId: Int, // 실제 선이 그려진 순서
     val thickness: Float,
     val opacity: Float,
     val color: Int,
