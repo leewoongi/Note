@@ -29,6 +29,7 @@ import com.woongi.home.ui.Note
 import com.woongi.home.ui.Toolbar
 import com.woongi.home.ui.component.LinePropertiesDialog
 import com.woongi.home.ui.component.PlatteDialog
+import com.woongi.home.ui.component.SaveDialog
 import com.woongi.navigator.NavigateItem
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -47,6 +48,7 @@ fun MyAppScreen(
 
     val thickness by viewModel.thickness.collectAsState()
     val opacity by viewModel.opacity.collectAsState()
+    val isVisibleSaveDialog by viewModel.saveDialog.collectAsState(false)
 
     LaunchedEffect(Unit) {
         viewModel.snackBar.collectLatest { message ->
@@ -122,6 +124,14 @@ fun MyAppScreen(
                         viewModel.updateColor(color, brightness, opacity)
                     },
                     onDismissRequest = { isColorPopupVisible = false }
+                )
+            }
+
+            if(isVisibleSaveDialog) {
+                SaveDialog(
+                    onDismiss = { viewModel.closeDialog() },
+                    onPositiveClick = { viewModel.savePath() }, // 새로 저장
+                    onNegativeClick = {  } // 덮어쓰기
                 )
             }
         }

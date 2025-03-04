@@ -63,10 +63,13 @@ class MainViewModel
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
 
+    private val _saveDialog = MutableSharedFlow<Boolean>(replay = 1)
+    val saveDialog = _saveDialog.asSharedFlow()
+
     fun setNavigateItem(navigateItem: NavigateItem) {
         val item = navigateItem.item ?: return
 
-        if(item is Path) {
+        if (item is Path) {
             val path = item.toPathUiModel()
             loadInitializeSaveData(path)
             _paths.value = path
@@ -112,7 +115,7 @@ class MainViewModel
         val id = _lines.size
         val newColor = Color(_color.value)
 
-        val newLine =  LineUiModel(
+        val newLine = LineUiModel(
             id = id,
             points = _points.toList(), // 선은 점의 모임
             color = newColor,
@@ -140,7 +143,7 @@ class MainViewModel
             blue = (color.blue * brightness).coerceIn(0f, 1f),
             alpha = opacity
         )
-        _color.value  = newColor.toArgb()
+        _color.value = newColor.toArgb()
     }
 
     // 지우기 그리기 모드가 있음
@@ -154,9 +157,14 @@ class MainViewModel
         _undo.value = _undo.value.dropLast(1)
         _redo.value += lastLine
 
-        when(lastLine) {
-            is UndoRedoPath.Draw -> { _lines.removeIf { it.id == lastLine.line.id } }
-            is UndoRedoPath.Erase -> { _lines += lastLine.lines.sortedBy { line-> line.id } }
+        when (lastLine) {
+            is UndoRedoPath.Draw -> {
+                _lines.removeIf { it.id == lastLine.line.id }
+            }
+
+            is UndoRedoPath.Erase -> {
+                _lines += lastLine.lines.sortedBy { line -> line.id }
+            }
         }
 
         drawPath()
@@ -168,9 +176,14 @@ class MainViewModel
         _redo.value = _redo.value.dropLast(1)
         _undo.value += lastLine
 
-        when(lastLine) {
-            is UndoRedoPath.Draw -> { _lines += lastLine.line }
-            is UndoRedoPath.Erase -> { _lines.removeIf { line -> lastLine.lines.any { it.id == line.id } } }
+        when (lastLine) {
+            is UndoRedoPath.Draw -> {
+                _lines += lastLine.line
+            }
+
+            is UndoRedoPath.Erase -> {
+                _lines.removeIf { line -> lastLine.lines.any { it.id == line.id } }
+            }
         }
 
         drawPath()
@@ -221,38 +234,58 @@ class MainViewModel
             }
 
             try {
-                saveUseCase.save(
-                    Path(
-                        id = _paths.value.id ,
-                        title = _paths.value.title,
-                        path = _paths.value.lines.map { line ->
-                            Line(
-                                id = line.id,
-                                thickness = line.thickness,
-                                opacity = line.opacity,
-                                color = line.color.toArgb(),
-                                points = line.points.map { point ->
-                                    Point(
-                                        type = point.type,
-                                        pointX = point.pointX,
-                                        pointY = point.pointY
-                                    )
-                                }
-                            )
-                        }
-                    )
-                )
-                _snackBar.emit("저장에 성공 했습니다.")
+                val pathId = _paths.value.id
+                if (pathId != null) {
+                    // 수정 시 다이얼로그 보여주기
+                    _saveDialog.emit(true)
+                } else {
+                    // 처음 그릴 때
+                    savePath()
+                }
             } catch (e: Exception) {
-                println("TEST TEST TEST e: $e")
                 _snackBar.emit("저장에 실패 했습니다.")
             }
         }
     }
 
+    fun savePath() {
+        viewModelScope.launch {
+            saveUseCase.save(
+                Path(
+                    id = null,
+                    title = _paths.value.title,
+                    path = _paths.value.lines.map { line ->
+                        Line(
+                            id = line.id,
+                            thickness = line.thickness,
+                            opacity = line.opacity,
+                            color = line.color.toArgb(),
+                            points = line.points.map { point ->
+                                Point(
+                                    type = point.type,
+                                    pointX = point.pointX,
+                                    pointY = point.pointY
+                                )
+                            }
+                        )
+                    }
+                )
+            )
+            _snackBar.emit("저장에 성공 했습니다.")
+        }
+    }
+
+    fun closeDialog() {
+        viewModelScope.launch {
+            _saveDialog.emit(false)
+        }
+    }
+
     fun navigateDetail() {
-        navigator.createIntent(Destination.Detail(
-            NavigateItem(item = null)
-        ))
+        navigator.createIntent(
+            Destination.Detail(
+                NavigateItem(item = null)
+            )
+        )
     }
 }

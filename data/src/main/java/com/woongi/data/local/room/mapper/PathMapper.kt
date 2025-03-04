@@ -6,7 +6,7 @@ import com.woongi.domain.point.entity.Path
 
 fun Path.toPathEntity() : PathEntity {
     return if(this.id == null) {
-        PathEntity(title = this.title)
+        PathEntity(id = null, title = this.title)
     } else {
         PathEntity(
             id = this.id,
