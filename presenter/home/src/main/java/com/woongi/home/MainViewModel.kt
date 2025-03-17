@@ -1,7 +1,6 @@
 package com.woongi.home
 
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Path
@@ -11,6 +10,7 @@ import com.woongi.home.model.constants.DialogType
 import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.mapper.toLine
 import com.woongi.home.model.mapper.toPathUiModel
+import com.woongi.home.model.uiModel.CanvasUiModel
 import com.woongi.home.model.uiModel.LineUiModel
 import com.woongi.home.model.uiModel.PathUiModel
 import com.woongi.home.model.uiModel.PointUiModel
@@ -22,7 +22,6 @@ import com.woongi.navigator.api.Navigator
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -36,32 +35,11 @@ class MainViewModel
     private val navigator: Navigator
 ) : ViewModel() {
 
-    private val _drawingType = MutableStateFlow(DrawingType.DRAWING)
-    val drawingType = _drawingType.asStateFlow()
-
-    private val _paths = MutableStateFlow(PathUiModel.default())
-    val paths: StateFlow<PathUiModel> get() = _paths.asStateFlow()
-
-    private val _pathsTitle = MutableStateFlow("")
-    val pathsTitle: StateFlow<String> get() = _pathsTitle.asStateFlow()
-
-    private val _undo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
-    val undo: StateFlow<List<UndoRedoPath>> get() = _undo.asStateFlow()
-
-    private val _redo = MutableStateFlow<List<UndoRedoPath>>(emptyList())
-    val redo: StateFlow<List<UndoRedoPath>> get() = _redo.asStateFlow()
+    private val _uiModel = MutableStateFlow(CanvasUiModel.default())
+    val uiModel = _uiModel.asStateFlow()
 
     private val _points: MutableList<PointUiModel> = mutableListOf()
     private val _lines: MutableList<LineUiModel> = mutableListOf()
-
-    private val _thickness = MutableStateFlow(1f)
-    val thickness: StateFlow<Float> get() = _thickness.asStateFlow()
-
-    private val _opacity = MutableStateFlow(1f)
-    val opacity: StateFlow<Float> get() = _opacity.asStateFlow()
-
-    private val _color = MutableStateFlow(Color.Black.toArgb())
-    val color: StateFlow<Int> get() = _color.asStateFlow()
 
     private val _snackBar = MutableSharedFlow<String>(replay = 1)
     val snackBar = _snackBar.asSharedFlow()
@@ -75,8 +53,10 @@ class MainViewModel
         if (item is Path) {
             val path = item.toPathUiModel()
             loadInitializeSaveData(path)
-            _paths.value = path
-            _pathsTitle.value = path.title
+            _uiModel.value = _uiModel.value.copy(
+                path = path,
+                title = path.title
+            )
         }
     }
 
@@ -86,16 +66,24 @@ class MainViewModel
     }
 
     fun updateThickness(thickness: Float) {
-        _thickness.value = thickness
+        _uiModel.value = _uiModel.value.copy(
+            currentThickness = thickness
+        )
     }
 
     fun updateOpacity(opacity: Float) {
-        _opacity.value = opacity
+        _uiModel.value = _uiModel.value.copy(
+            currentOpacity = opacity
+        )
     }
 
     // 캔버스에 그리는 용도
     private fun drawPath() {
-        _paths.value = _paths.value.copy(lines = _lines)
+        _uiModel.value = _uiModel.value.copy(
+            path = _uiModel.value.path.copy(
+                lines = _lines
+            )
+        )
     }
 
 
@@ -117,20 +105,22 @@ class MainViewModel
     // 선 데이터 기록
     fun recordLine() {
         val id = _lines.size
-        val newColor = Color(_color.value)
+        val newColor = _uiModel.value.currentColor
 
         val newLine = LineUiModel(
             id = id,
             points = _points.toList(), // 선은 점의 모임
             color = newColor,
-            thickness = _thickness.value,
-            opacity = _opacity.value
+            thickness = _uiModel.value.currentThickness,
+            opacity = _uiModel.value.currentOpacity
         )
 
         _lines.add(newLine)
         _points.clear()
-        _undo.value += UndoRedoPath.Draw(newLine)
-        _redo.value = emptyList()
+        _uiModel.value = _uiModel.value.copy(
+            undo = _uiModel.value.undo + UndoRedoPath.Draw(newLine),
+            redo = emptyList()
+        )
 
         drawPath()
     }
@@ -147,49 +137,46 @@ class MainViewModel
             blue = (color.blue * brightness).coerceIn(0f, 1f),
             alpha = opacity
         )
-        _color.value = newColor.toArgb()
+        _uiModel.value = _uiModel.value.copy(
+            currentColor = newColor
+        )
     }
 
     // 지우기 그리기 모드가 있음
     fun updateMode(type: DrawingType) {
-        _drawingType.value = type
+        _uiModel.value = _uiModel.value.copy(
+            type = type
+        )
     }
 
     // 이전 상태로
     fun undo() {
-        val lastLine = _undo.value.last()
-        _undo.value = _undo.value.dropLast(1)
-        _redo.value += lastLine
+        val lastAction = _uiModel.value.undo.lastOrNull() ?: return
+        val newUndoList = _uiModel.value.undo.dropLast(1)
+        val newRedoList = _uiModel.value.redo + lastAction
 
-        when (lastLine) {
-            is UndoRedoPath.Draw -> {
-                _lines.removeIf { it.id == lastLine.line.id }
-            }
-
-            is UndoRedoPath.Erase -> {
-                _lines += lastLine.lines.sortedBy { line -> line.id }
-            }
+        when (lastAction) {
+            is UndoRedoPath.Draw -> _lines.removeIf { it.id == lastAction.line.id }
+            is UndoRedoPath.Erase -> _lines += lastAction.lines.sortedBy { it.id }
         }
 
+        _uiModel.value = _uiModel.value.copy(undo = newUndoList, redo = newRedoList)
         drawPath()
     }
 
     // 복구
     fun redo() {
-        val lastLine = _redo.value.last()
-        _redo.value = _redo.value.dropLast(1)
-        _undo.value += lastLine
+        val lastAction = _uiModel.value.redo.lastOrNull() ?: return
+        val newRedoList = _uiModel.value.redo.dropLast(1)
+        val newUndoList = _uiModel.value.undo + lastAction
 
-        when (lastLine) {
-            is UndoRedoPath.Draw -> {
-                _lines += lastLine.line
-            }
 
-            is UndoRedoPath.Erase -> {
-                _lines.removeIf { line -> lastLine.lines.any { it.id == line.id } }
-            }
+        when (lastAction) {
+            is UndoRedoPath.Draw -> _lines += lastAction.line
+            is UndoRedoPath.Erase -> _lines.removeIf { line -> lastAction.lines.any { it.id == line.id } }
         }
 
+        _uiModel.value = _uiModel.value.copy(undo = newUndoList, redo = newRedoList)
         drawPath()
     }
 
@@ -209,8 +196,10 @@ class MainViewModel
         }
 
         if (erased.isNotEmpty()) {
-            _undo.value += UndoRedoPath.Erase(erased)
-            _redo.value = emptyList()
+            _uiModel.value = _uiModel.value.copy(
+                undo = _uiModel.value.undo + UndoRedoPath.Erase(erased),
+                redo = emptyList()
+            )
 
             _lines.removeAll { line -> line in erased }
             drawPath()
@@ -236,13 +225,13 @@ class MainViewModel
                 return@launch
             }
 
-            val pathId = _paths.value.id
+            val pathId = _uiModel.value.path.id
             _saveDialog.emit(
                 SaveDialogUiModel(
                     type = if (pathId == null) DialogType.CREATE else DialogType.MODIFY,
                     dialogTitle = "저장",
                     subTitle = "제목을 입력하세요",
-                    pathTitle = if(pathId == null) "" else _paths.value.title,
+                    pathTitle = if(pathId == null) "" else _uiModel.value.title,
                     positiveName = "새로저장",
                     isVisibleNegativeButton = pathId != null,
                     negativeName = if (pathId == null) "" else "덮어쓰기"
@@ -252,7 +241,7 @@ class MainViewModel
     }
 
     fun savePath(title: String) = saveOrUpdatePath(null, title) // 저장
-    fun coverPath(title: String) = saveOrUpdatePath(_paths.value.id, title) // 수정 (덮어쓰기)
+    fun coverPath(title: String) = saveOrUpdatePath(_uiModel.value.path.id, title) // 수정 (덮어쓰기)
 
     private fun saveOrUpdatePath(id: Int?, title: String) {
         viewModelScope.launch {

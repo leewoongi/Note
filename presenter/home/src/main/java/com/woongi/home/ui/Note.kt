@@ -27,17 +27,14 @@ fun Note(
 ){
     var currentPath by remember { mutableStateOf(Path()) }
     var erasePath by remember { mutableStateOf<Offset?>(null) }
-    val type by viewModel.drawingType.collectAsState()
-    val path by viewModel.paths.collectAsState()
-    val color by viewModel.color.collectAsState()
-    val thickness by viewModel.thickness.collectAsState()
+    val uiModel by viewModel.uiModel.collectAsState()
 
     Canvas(
         modifier = modifier
             .pointerInput(Unit) {
                 detectDragGestures(
                     onDragStart = { dragAmount: Offset ->
-                        if(type == DrawingType.DRAWING) {
+                        if(uiModel.type == DrawingType.DRAWING) {
                             currentPath = Path().apply {
                                 addPath(currentPath)
                                 moveTo(dragAmount.x, dragAmount.y)
@@ -54,7 +51,7 @@ fun Note(
                         }
                     },
                     onDragEnd = {
-                        if(type == DrawingType.DRAWING) {
+                        if(uiModel.type == DrawingType.DRAWING) {
                             viewModel.recordLine()
                             currentPath = Path()
                         } else {
@@ -64,7 +61,7 @@ fun Note(
 
                     onDragCancel = {  },
                     onDrag = { change: PointerInputChange, dragAmount: Offset ->
-                        if(type == DrawingType.DRAWING) {
+                        if(uiModel.type == DrawingType.DRAWING) {
                             currentPath = Path().apply {
                                 addPath(currentPath)
                                 lineTo(change.position.x, change.position.y)
@@ -84,7 +81,7 @@ fun Note(
             }
     ){
         // 기존에 그린 선
-        path.lines.forEach { line ->
+        uiModel.path.lines.forEach { line ->
             val draw = Path()
             line.points.forEach { point ->
                 when(point.type){
@@ -101,11 +98,11 @@ fun Note(
         }
 
         // 현재 그려지고 있는 선
-        if(type == DrawingType.DRAWING) {
+        if(uiModel.type == DrawingType.DRAWING) {
             drawPath(
                 path = currentPath,
-                color = Color(color),
-                style = Stroke(width = thickness) // 선 두께 설정
+                color = uiModel.currentColor,
+                style = Stroke(width = uiModel.currentThickness) // 선 두께 설정
             )
         } else {
             erasePath?.let {
