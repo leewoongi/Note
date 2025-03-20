@@ -46,8 +46,7 @@ fun MyAppScreen(
     var isPropertyPopupVisible by remember { mutableStateOf(false) }
     var isColorPopupVisible by remember { mutableStateOf(false) }
 
-    val thickness by viewModel.thickness.collectAsState()
-    val opacity by viewModel.opacity.collectAsState()
+    val uiModel by viewModel.uiModel.collectAsState()
     val saveDialog by viewModel.saveDialog.collectAsState(null)
 
     LaunchedEffect(Unit) {
@@ -110,8 +109,8 @@ fun MyAppScreen(
                         isPropertyPopupVisible = false
                     },
                     icon = Icons.Default.Close,
-                    thickness = thickness,
-                    opacity = opacity
+                    thickness = uiModel.currentThickness,
+                    opacity = uiModel.currentOpacity
                 )
             }
 

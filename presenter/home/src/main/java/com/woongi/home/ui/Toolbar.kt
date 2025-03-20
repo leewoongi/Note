@@ -29,8 +29,7 @@ fun Toolbar(
     onClickPlatte: () -> Unit = {},
     onClickDrawing: () -> Unit = {},
 ) {
-    val undo by viewModel.undo.collectAsState()
-    val redo by viewModel.redo.collectAsState()
+    val uiModel by viewModel.uiModel.collectAsState()
 
     Box(
         modifier = modifier,
@@ -57,27 +56,27 @@ fun Toolbar(
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = if(undo.isEmpty()) {
+                modifier = if(uiModel.undo.isEmpty()) {
                     Modifier
                 } else {
                     Modifier.singleClick( onSingleClick = { viewModel.undo() } )
                 },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_undo),
                 contentDescription = "undo",
-                tint = if(undo.isEmpty()) Color.Gray else Color.Black,
+                tint = if(uiModel.undo.isEmpty()) Color.Gray else Color.Black,
             )
 
             Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
-                modifier = if(redo.isEmpty()) {
+                modifier = if(uiModel.redo.isEmpty()) {
                     Modifier
                 } else {
                     Modifier.singleClick( onSingleClick = { viewModel.redo() } )
                 },
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_redo),
                 contentDescription = "redo",
-                tint = if(redo.isEmpty()) Color.Gray else Color.Black,
+                tint = if(uiModel.redo.isEmpty()) Color.Gray else Color.Black,
             )
 
             Spacer(modifier = Modifier.width(16.dp))
