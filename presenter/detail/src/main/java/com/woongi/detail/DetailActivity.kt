@@ -1,14 +1,15 @@
 package com.woongi.detail
 
+import android.Manifest
+import android.os.Build
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.View
 import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.TextView
+import android.widget.Toast
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
-import androidx.annotation.NonNull
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
@@ -16,9 +17,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
+import com.woongi.detail.extension.registerPermissionLauncher
+import com.woongi.detail.extension.requestGallery
 import com.woongi.detail.recyclerview.DetailRecyclerViewAdapter
 import com.woongi.detail.recyclerview.event.createSwipeCallback
-import com.woongi.navigator.api.Destination
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -34,6 +36,9 @@ class DetailActivity : AppCompatActivity() {
     private lateinit var recyclerViewAdapter: DetailRecyclerViewAdapter
     private lateinit var subTitleTextView: TextView
     private lateinit var settingButton: ImageView
+    private lateinit var permissionLauncher: ActivityResultLauncher<Array<String>>
+    private lateinit var galleryLauncher: ActivityResultLauncher<String>
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,6 +61,19 @@ class DetailActivity : AppCompatActivity() {
                     .show()
             }
         }
+
+        permissionLauncher = registerPermissionLauncher(
+            onGranted = { openGallery() }
+        )
+
+        galleryLauncher = requestGallery(
+            onImageSelected = { uri ->
+
+            },
+            onCancelled = {
+                Toast.makeText(this, "이미지 선택이 취소되었습니다", Toast.LENGTH_SHORT).show()
+            }
+        )
     }
 
     private fun init() {
@@ -67,7 +85,7 @@ class DetailActivity : AppCompatActivity() {
 
         recyclerView = findViewById(R.id.rv_detail)
         recyclerViewAdapter = DetailRecyclerViewAdapter(
-            onClick = { path -> viewModel.navigateHome(item = path)},
+            onClick = { path -> viewModel.navigateHome(item = path) },
             onRemove = { path ->
                 viewModel.delete(path)
                 viewModel.showSnackBar("삭제 되었습니다.")
@@ -79,7 +97,8 @@ class DetailActivity : AppCompatActivity() {
             layoutManager = LinearLayoutManager(context)
             createSwipeCallback(
                 onSwipe = { position ->
-                    recyclerViewAdapter.remove(position = position) }
+                    recyclerViewAdapter.remove(position = position)
+                }
             ).attachToRecyclerView(this)
         }
 
@@ -89,12 +108,28 @@ class DetailActivity : AppCompatActivity() {
             popupMenu.setOnMenuItemClickListener { item ->
                 when (item.itemId) {
                     R.id.item_image -> {
-                      
+                        val permission =  when {
+                            Build.VERSION.SDK_INT >= 35 -> arrayOf(
+                                Manifest.permission.READ_MEDIA_IMAGES,
+                                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                            )
+                            Build.VERSION.SDK_INT >= 33 -> arrayOf(
+                                Manifest.permission.READ_MEDIA_IMAGES
+                            )
+                            else -> arrayOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            )
+                        }
+                        permissionLauncher.launch(permission)
                     }
                 }
                 false
             }
             popupMenu.show()
         }
+    }
+
+    private fun openGallery() {
+        galleryLauncher.launch("image/*")
     }
 }
