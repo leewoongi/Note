@@ -30,7 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.woongi.home.extension.rememberGalleryLauncher
 import com.woongi.home.extension.rememberPermissionLauncher
-import com.woongi.home.model.mapper.uriToImageBitmap
 import com.woongi.home.ui.Note
 import com.woongi.home.ui.Toolbar
 import com.woongi.home.ui.component.LinePropertiesDialog
@@ -58,7 +57,8 @@ fun MyAppScreen(
 
     val galleryLauncher = rememberGalleryLauncher(
         onImageSelected = { uri ->
-            viewModel.saveBitmap(uri.uriToImageBitmap(context))
+//            viewModel.saveBitmap(uri.uriToImageBitmap(context))
+            viewModel.saveUri(uri)
         },
         onCancelled = {
             Toast.makeText(context, "이미지 선택이 취소되었습니다", Toast.LENGTH_SHORT).show()

@@ -1,12 +1,12 @@
 package com.woongi.home.model.uiModel
 
+import android.net.Uri
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import com.woongi.home.model.constants.DrawingType
 
 data class CanvasUiModel(
     val type: DrawingType,
-    val bitmap: ImageBitmap?,
+    val uri: Uri?,
     val path: PathUiModel,
     val title: String,
     val undo: List<UndoRedoPath>,
@@ -18,7 +18,7 @@ data class CanvasUiModel(
     companion object {
         fun default() = CanvasUiModel(
             type = DrawingType.DRAWING,
-            bitmap = null,
+            uri = null,
             path = PathUiModel.default(),
             title = "",
             undo = emptyList(),

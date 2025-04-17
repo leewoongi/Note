@@ -43,6 +43,8 @@ class FeatureConventionPlugin : Plugin<Project> {
                 add("implementation", project(":domain"))
                 add("implementation", project(":core"))
                 add("implementation", libs.findLibrary("gson").get())
+                add("implementation", libs.findLibrary("glide").get())
+                add("kapt", libs.findLibrary("glide-compiler").get())
             }
         }
     }
