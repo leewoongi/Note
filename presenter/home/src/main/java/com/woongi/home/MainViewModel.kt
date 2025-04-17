@@ -1,5 +1,6 @@
 package com.woongi.home
 
+import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -250,14 +251,21 @@ class MainViewModel
                     Path(
                         id = id,
                         title = title,
-                        path = _lines.map { line -> line.toLine() }
+                        path = _lines.map { line -> line.toLine() },
+                        image = _uiModel.value.uri?.toString()
                     )
                 )
                 _snackBar.emit("저장에 성공 했습니다.")
             } catch (e: Exception) {
-                _snackBar.emit("저장에 실패 했습니다.")
+                _snackBar.emit("path 저장에 실패 했습니다.")
             }
         }
+    }
+
+    fun saveUri(uri: Uri){
+        _uiModel.value = _uiModel.value.copy(
+            uri = uri
+        )
     }
 
     fun closeDialog() {

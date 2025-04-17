@@ -10,5 +10,6 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "paths")
 data class PathEntity(
     @PrimaryKey(autoGenerate = true) val id: Int?,
-    val title: String
+    val title: String,
+    val image: String?
 )

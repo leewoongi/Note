@@ -43,7 +43,6 @@ class DetailRecyclerViewAdapter(
     fun set(newItems: List<Path>) {
         val diffCallback = DetailDiffUtil(items, newItems)
         val diffResult = DiffUtil.calculateDiff(diffCallback)
-
         items.clear()
         items.addAll(newItems)
         diffResult.dispatchUpdatesTo(this)

@@ -2,4 +2,5 @@
 <resources>
     <string name="toolbar_title">모든 노트</string>
     <string name="note_count">노트 %d개</string>
+    <string name="menu_item">갤러리에서 가져오기</string>
 </resources>
