@@ -1,5 +1,8 @@
 package com.woongi.home
 
+import android.Manifest
+import android.os.Build
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -25,9 +28,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.woongi.home.extension.rememberGalleryLauncher
+import com.woongi.home.extension.rememberPermissionLauncher
+import com.woongi.home.model.mapper.uriToImageBitmap
 import com.woongi.home.ui.Note
 import com.woongi.home.ui.Toolbar
 import com.woongi.home.ui.component.LinePropertiesDialog
+import com.woongi.home.ui.component.PermissionSettingDialog
 import com.woongi.home.ui.component.PlatteDialog
 import com.woongi.home.ui.component.SaveDialog
 import com.woongi.navigator.NavigateItem
@@ -36,11 +43,10 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun MyAppScreen(
-    navigateItem: NavigateItem?
+    navigateItem: NavigateItem?,
 ) {
     val context = LocalContext.current
     val viewModel: MainViewModel = hiltViewModel()
-
     val snackBarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
     var isPropertyPopupVisible by remember { mutableStateOf(false) }
@@ -48,6 +54,22 @@ fun MyAppScreen(
 
     val uiModel by viewModel.uiModel.collectAsState()
     val saveDialog by viewModel.saveDialog.collectAsState(null)
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
+    val galleryLauncher = rememberGalleryLauncher(
+        onImageSelected = { uri ->
+            viewModel.saveBitmap(uri.uriToImageBitmap(context))
+        },
+        onCancelled = {
+            Toast.makeText(context, "이미지 선택이 취소되었습니다", Toast.LENGTH_SHORT).show()
+        }
+    )
+
+    val permissionLauncher = rememberPermissionLauncher(
+        onGranted = { galleryLauncher.launch("image/*") },
+        onDenied = { showPermissionDialog = true }
+    )
+
 
     LaunchedEffect(Unit) {
         viewModel.snackBar.collectLatest { message ->
@@ -82,6 +104,21 @@ fun MyAppScreen(
                         .background(Color.White)
                         .height(56.dp),
                     viewModel = viewModel,
+                    onClickGallery = {
+                        val permission =  when {
+                            Build.VERSION.SDK_INT >= 35 -> arrayOf(
+                                Manifest.permission.READ_MEDIA_IMAGES,
+                                Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
+                            )
+                            Build.VERSION.SDK_INT >= 33 -> arrayOf(
+                                Manifest.permission.READ_MEDIA_IMAGES
+                            )
+                            else -> arrayOf(
+                                Manifest.permission.READ_EXTERNAL_STORAGE
+                            )
+                        }
+                        permissionLauncher.launch(permission)
+                    },
                     onClickPlatte = { isColorPopupVisible = true },
                     onClickDrawing = { isPropertyPopupVisible = true }
                 )
@@ -139,6 +176,12 @@ fun MyAppScreen(
                             )
                         }
                     }
+                )
+            }
+
+            if (showPermissionDialog) {
+                PermissionSettingDialog(
+                    onDismiss = { showPermissionDialog = false }
                 )
             }
         }

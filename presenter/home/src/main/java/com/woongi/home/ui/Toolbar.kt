@@ -26,6 +26,7 @@ import com.woongi.home.model.constants.DrawingType
 fun Toolbar(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel,
+    onClickGallery: () -> Unit = {},
     onClickPlatte: () -> Unit = {},
     onClickDrawing: () -> Unit = {},
 ) {
@@ -42,6 +43,18 @@ fun Toolbar(
                 .align(Alignment.CenterEnd),
             horizontalArrangement = Arrangement.End
         ) {
+
+            Icon(
+                modifier = Modifier
+                    .singleClick(
+                        onSingleClick = { onClickGallery() }
+                    ),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_gallery),
+                contentDescription = "gallery",
+                tint = Color.Black,
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
 
             Icon(
                 modifier = Modifier

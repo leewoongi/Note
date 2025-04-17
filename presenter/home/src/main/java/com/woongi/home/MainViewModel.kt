@@ -1,6 +1,10 @@
 package com.woongi.home
 
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.net.Uri
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.woongi.domain.point.entity.Path
@@ -10,6 +14,7 @@ import com.woongi.home.model.constants.DialogType
 import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.mapper.toLine
 import com.woongi.home.model.mapper.toPathUiModel
+import com.woongi.home.model.mapper.uriToImageBitmap
 import com.woongi.home.model.uiModel.CanvasUiModel
 import com.woongi.home.model.uiModel.LineUiModel
 import com.woongi.home.model.uiModel.PathUiModel
@@ -258,6 +263,12 @@ class MainViewModel
                 _snackBar.emit("저장에 실패 했습니다.")
             }
         }
+    }
+
+    fun saveBitmap(bitmap: ImageBitmap) {
+        _uiModel.value = _uiModel.value.copy(
+            bitmap = bitmap
+        )
     }
 
     fun closeDialog() {

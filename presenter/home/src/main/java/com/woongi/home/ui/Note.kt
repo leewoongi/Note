@@ -15,9 +15,11 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntSize
 import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.home.MainViewModel
 import com.woongi.home.model.constants.DrawingType
+import com.woongi.home.model.mapper.resizeImageBitmap
 
 
 @Composable
@@ -28,6 +30,30 @@ fun Note(
     var currentPath by remember { mutableStateOf(Path()) }
     var erasePath by remember { mutableStateOf<Offset?>(null) }
     val uiModel by viewModel.uiModel.collectAsState()
+
+    var canvasSize by remember { mutableStateOf(IntSize(0, 0)) }
+    val resizedBitmap = remember(uiModel.bitmap, canvasSize) {
+        uiModel.bitmap?.let { bitmap ->
+            val canvasWidth = canvasSize.width
+            val canvasHeight = canvasSize.height
+
+            val imageWidth = bitmap.width
+            val imageHeight = bitmap.height
+
+            val scale = minOf(
+                canvasWidth.toFloat() / imageWidth,
+                canvasHeight.toFloat() / imageHeight
+            )
+            val scaledWidth = (imageWidth * scale).toInt()
+            val scaledHeight = (imageHeight * scale).toInt()
+
+            resizeImageBitmap(bitmap, scaledWidth, scaledHeight) to
+                    Offset(
+                        x = (canvasWidth - scaledWidth) / 2f,
+                        y = (canvasHeight - scaledHeight) / 2f
+                    )
+        }
+    }
 
     Canvas(
         modifier = modifier
@@ -80,6 +106,14 @@ fun Note(
                 )
             }
     ){
+        canvasSize = IntSize(size.width.toInt(), size.height.toInt())
+        resizedBitmap?.let { (bitmap, offset) ->
+            drawImage(
+                image = bitmap,
+                topLeft = offset
+            )
+        }
+
         // 기존에 그린 선
         uiModel.path.lines.forEach { line ->
             val draw = Path()
