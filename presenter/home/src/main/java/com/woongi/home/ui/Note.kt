@@ -20,6 +20,7 @@ import com.woongi.domain.point.entity.constants.PathType
 import com.woongi.home.MainViewModel
 import com.woongi.home.model.constants.DrawingType
 import com.woongi.home.model.mapper.resizeImageBitmap
+import com.woongi.home.model.mapper.toGrayscaleImageBitmap
 
 
 @Composable
@@ -47,11 +48,13 @@ fun Note(
             val scaledWidth = (imageWidth * scale).toInt()
             val scaledHeight = (imageHeight * scale).toInt()
 
-            resizeImageBitmap(bitmap, scaledWidth, scaledHeight) to
-                    Offset(
-                        x = (canvasWidth - scaledWidth) / 2f,
-                        y = (canvasHeight - scaledHeight) / 2f
-                    )
+            val resized = resizeImageBitmap(bitmap, scaledWidth, scaledHeight)
+            val grayscale = toGrayscaleImageBitmap(resized) // 흑백 처리 추가
+
+            grayscale to Offset(
+                x = (canvasWidth - scaledWidth) / 2f,
+                y = (canvasHeight - scaledHeight) / 2f
+            )
         }
     }
 
