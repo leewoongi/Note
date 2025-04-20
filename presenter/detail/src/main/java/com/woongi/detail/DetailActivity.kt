@@ -32,8 +32,6 @@ class DetailActivity : AppCompatActivity() {
         setContentView(R.layout.layout_detail)
         init()
 
-        viewModel.load()
-
         lifecycleScope.launch {
             viewModel.lines.collectLatest {
                 subTitleTextView.text = this@DetailActivity.getString(R.string.note_count, it.size)
@@ -47,6 +45,11 @@ class DetailActivity : AppCompatActivity() {
                     .show()
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.load()
     }
 
     private fun init() {
