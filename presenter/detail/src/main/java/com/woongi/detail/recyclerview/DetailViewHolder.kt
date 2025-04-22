@@ -8,6 +8,8 @@ import android.view.View
 import android.widget.TextView
 import androidx.compose.ui.graphics.AndroidPath
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
 import com.woongi.core.extension.dpToPx
 import com.woongi.detail.R
 import com.woongi.detail.model.PathProperties
@@ -32,7 +34,10 @@ internal class DetailViewHolder(
             .asBitmap()
             .load(path.image) // content:// URI
             .into(object : CustomTarget<Bitmap>() {
-                override fun onResourceReady(resource: Bitmap, transition: Transition<in Bitmap>?) {
+                override fun onResourceReady(
+                    resource: Bitmap,
+                    transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
+                ) {
                     canvasView.setImageBitmap(resource)
                 }
 
