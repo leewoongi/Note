@@ -22,6 +22,7 @@ class FeatureConventionPlugin : Plugin<Project> {
                 apply("org.jetbrains.kotlin.android")
                 apply("org.jetbrains.kotlin.plugin.compose")
                 apply("kotlin-parcelize")
+                apply("com.google.devtools.ksp")
                 apply("note.hilt")
             }
 
