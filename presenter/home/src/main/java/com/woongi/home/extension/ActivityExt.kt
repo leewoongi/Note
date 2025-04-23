@@ -27,6 +27,7 @@ fun rememberGalleryLauncher(
     return rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri ->
+
         if (uri != null) {
             onImageSelected(uri)
         } else {

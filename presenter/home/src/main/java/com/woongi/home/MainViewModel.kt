@@ -257,7 +257,7 @@ class MainViewModel
                 )
                 _snackBar.emit("저장에 성공 했습니다.")
             } catch (e: Exception) {
-                _snackBar.emit("path 저장에 실패 했습니다.")
+                _snackBar.emit("저장에 실패 했습니다.")
             }
         }
     }

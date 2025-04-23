@@ -5,15 +5,11 @@ import com.woongi.domain.point.entity.Line
 import com.woongi.domain.point.entity.Path
 
 fun Path.toPathEntity() : PathEntity {
-    return if(this.id == null) {
-        PathEntity(id = null, title = this.title, image = this.image)
-    } else {
-        PathEntity(
-            id = this.id,
-            title = this.title,
-            image = this.image
-        )
-    }
+    return PathEntity(
+        id = this.id,
+        title = this.title,
+        image = this.image
+    )
 }
 
 

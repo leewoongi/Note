@@ -2,6 +2,8 @@ package com.woongi.detail
 
 import android.Manifest
 import android.os.Build
+import android.os.Build.VERSION_CODES.TIRAMISU
+import android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM
 import android.os.Bundle
 import android.widget.ImageView
 import android.widget.PopupMenu
@@ -9,7 +11,6 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.viewModels
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
@@ -76,6 +77,10 @@ class DetailActivity : AppCompatActivity() {
         )
     }
 
+    override fun onResume() {
+        super.onResume()
+    }
+
     private fun init() {
         toolbar = findViewById(R.id.toolbar)
         faButton = findViewById(R.id.fab_add)
@@ -109,11 +114,11 @@ class DetailActivity : AppCompatActivity() {
                 when (item.itemId) {
                     R.id.item_image -> {
                         val permission =  when {
-                            Build.VERSION.SDK_INT >= 35 -> arrayOf(
+                            Build.VERSION.SDK_INT >= VANILLA_ICE_CREAM -> arrayOf(
                                 Manifest.permission.READ_MEDIA_IMAGES,
                                 Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED
                             )
-                            Build.VERSION.SDK_INT >= 33 -> arrayOf(
+                            Build.VERSION.SDK_INT >= TIRAMISU -> arrayOf(
                                 Manifest.permission.READ_MEDIA_IMAGES
                             )
                             else -> arrayOf(
