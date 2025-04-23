@@ -1,10 +1,15 @@
 package com.woongi.detail.recyclerview
 
+import android.graphics.Bitmap
 import android.graphics.Path
+import android.graphics.drawable.Drawable
+import android.transition.Transition
 import android.view.View
 import android.widget.TextView
 import androidx.compose.ui.graphics.AndroidPath
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.target.CustomTarget
 import com.woongi.core.extension.dpToPx
 import com.woongi.detail.R
 import com.woongi.detail.model.PathProperties
@@ -24,6 +29,20 @@ internal class DetailViewHolder(
     ) {
         canvasView = view.findViewById(R.id.canvas)
         textView = view.findViewById(R.id.tv_description)
+
+        Glide.with(view.context)
+            .asBitmap()
+            .load(path.image) // content:// URI
+            .into(object : CustomTarget<Bitmap>() {
+                override fun onResourceReady(
+                    resource: Bitmap,
+                    transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
+                ) {
+                    canvasView.setImageBitmap(resource)
+                }
+
+                override fun onLoadCleared(placeholder: Drawable?) {}
+            })
 
         // 전체화면에 그려진 선들을 54dp 사이즈 캔버스에 들어가게 하기위해서 스케일링
 
