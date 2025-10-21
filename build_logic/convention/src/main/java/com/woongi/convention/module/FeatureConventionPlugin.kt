@@ -22,6 +22,7 @@ class FeatureConventionPlugin : Plugin<Project> {
                 apply("org.jetbrains.kotlin.android")
                 apply("org.jetbrains.kotlin.plugin.compose")
                 apply("kotlin-parcelize")
+                apply("com.google.devtools.ksp")
                 apply("note.hilt")
             }
 
@@ -43,6 +44,9 @@ class FeatureConventionPlugin : Plugin<Project> {
                 add("implementation", project(":domain"))
                 add("implementation", project(":core"))
                 add("implementation", libs.findLibrary("gson").get())
+                // Glide 추가
+                add("implementation", libs.findLibrary("glide").get())
+                add("kapt", libs.findLibrary("glide-compiler").get())
             }
         }
     }

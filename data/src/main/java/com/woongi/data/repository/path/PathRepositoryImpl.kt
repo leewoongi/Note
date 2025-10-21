@@ -21,7 +21,7 @@ class PathRepositoryImpl
 ) : PathRepository {
 
     override suspend fun getAll(): List<Path> {
-         return pathDao.getAll().map { pathEntity ->
+        return pathDao.getAll().map { pathEntity ->
             val lines = lineDao.getLinesByPathId(pathEntity.id!!).map { lineEntity ->
                 val points = pointDao.getPointsByLineId(lineEntity.id).map { pointEntity ->
                     pointEntity.toPoint()

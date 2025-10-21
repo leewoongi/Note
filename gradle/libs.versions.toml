@@ -24,6 +24,7 @@ ksp = "2.1.0-1.0.29"
 uiGeometryAndroid = "1.7.8"
 gson = "2.10.1"
 roomGradlePlugin = "2.6.1" # 코틀린 2.0.0부터는 플러그인으로 직접 사용 - 라이브러리 추가로는 사용안됨
+glide = "4.15.1"
 
 
 [libraries]
@@ -75,6 +76,8 @@ androidx-ui-geometry-android = { group = "androidx.compose.ui", name = "ui-geome
 
 gson = { module = "com.google.code.gson:gson", version.ref = "gson"}
 androidx-room-gradle-plugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "roomGradlePlugin" }
+glide = { module = "com.github.bumptech.glide:glide", version.ref = "glide" }
+glide-compiler = { module = "com.github.bumptech.glide:compiler", version.ref = "glide" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
